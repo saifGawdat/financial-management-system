@@ -1,0 +1,27 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap");
+@import "tailwindcss";
+@theme {
+  --font-display: "Roboto Slab", serif;
+  --font-body: "Roboto Slab", serif;
+  --font-heading: "Roboto Slab", serif;
+  --font-button: "Roboto Slab", serif;
+  --font-caption: "Roboto Slab", serif;
+  --font-label: "Roboto Slab", serif;
+  --font-legend: "Roboto Slab", serif;
+  --font-menu: "Roboto Slab", serif;
+  --font-message: "Roboto Slab", serif;
+  --font-placeholder: "Roboto Slab", serif;
+  --font-small-caption: "Roboto Slab", serif;
+  --font-subhead: "Roboto Slab", serif;
+  --font-title: "Roboto Slab", serif;
+}
+@layer base {
+  body {
+    background-color: #fcfbfc;
+    overflow-x: hidden;
+  }
+  html {
+    scroll-behavior: smooth;
+    font-family: var(--font-display);
+  }
+}
