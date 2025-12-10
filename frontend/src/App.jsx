@@ -12,6 +12,10 @@ import Home from "./pages/Dashboard/Home";
 import Income from "./pages/Dashboard/Income";
 import Expense from "./pages/Dashboard/Expense";
 import Warehouse from "./pages/Dashboard/Warehouse";
+import Employee from "./pages/Dashboard/Employee";
+import ExpenseCategories from "./pages/Dashboard/ExpenseCategories";
+import MonthlySalaries from "./pages/Dashboard/MonthlySalaries";
+import ProfitSummary from "./pages/Dashboard/ProfitSummary";
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -64,6 +68,38 @@ function App() {
           element={
             <ProtectedRoute>
               <Warehouse />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/employees"
+          element={
+            <ProtectedRoute>
+              <Employee />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/expense-categories"
+          element={
+            <ProtectedRoute>
+              <ExpenseCategories />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/monthly-salaries"
+          element={
+            <ProtectedRoute>
+              <MonthlySalaries />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profit-summary"
+          element={
+            <ProtectedRoute>
+              <ProfitSummary />
             </ProtectedRoute>
           }
         />
