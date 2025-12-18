@@ -11,7 +11,6 @@ import SignUp from "./pages/Auth/SignUp";
 import Home from "./pages/Dashboard/Home";
 import Income from "./pages/Dashboard/Income";
 import Expense from "./pages/Dashboard/Expense";
-import Warehouse from "./pages/Dashboard/Warehouse";
 import Employee from "./pages/Dashboard/Employee";
 import ExpenseCategories from "./pages/Dashboard/ExpenseCategories";
 import MonthlySalaries from "./pages/Dashboard/MonthlySalaries";
@@ -60,14 +59,6 @@ function App() {
           element={
             <ProtectedRoute>
               <Expense />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/warehouse"
-          element={
-            <ProtectedRoute>
-              <Warehouse />
             </ProtectedRoute>
           }
         />

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import MonthYearSelector from "../../components/ui/MonthYearSelector";
 import {
@@ -12,7 +12,6 @@ const ExpenseCategories = () => {
   const [month, setMonth] = useState(currentDate.getMonth() + 1);
   const [year, setYear] = useState(currentDate.getFullYear());
   const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -23,22 +22,19 @@ const ExpenseCategories = () => {
 
   const defaultCategories = ["Transportation", "Repair", "Equipment"];
 
-  useEffect(() => {
-    fetchCategories();
-  }, [month, year]);
-
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
-      setLoading(true);
       const data = await getExpenseCategories(month, year);
       setCategories(data);
     } catch (error) {
       console.error("Error fetching categories:", error);
       setError("Failed to load expense categories");
-    } finally {
-      setLoading(false);
     }
-  };
+  }, [month, year]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const handleMonthYearChange = (newMonth, newYear) => {
     setMonth(newMonth);
@@ -47,10 +43,11 @@ const ExpenseCategories = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
     try {
       await createExpenseCategory({
         category: formData.category,
-        amount: parseFloat(formData.amount),
+        amount: parseFloat(formData.amount) || 0,
         month,
         year,
         description: formData.description,
@@ -59,8 +56,11 @@ const ExpenseCategories = () => {
       setFormData({ category: "", amount: "", description: "" });
       fetchCategories();
     } catch (error) {
-      console.error("Error adding expense:", error);
-      setError("Failed to add expense");
+      console.error("Error adding expense category:", error);
+      const msg =
+        error.response?.data?.message ||
+        "Failed to add expense category. Please try again.";
+      setError(msg);
     }
   };
 
@@ -93,7 +93,10 @@ const ExpenseCategories = () => {
   };
 
   const allCategoryNames = [...new Set(categories.map((c) => c.category))];
-  const totalExpenses = categories.reduce((sum, cat) => sum + cat.amount, 0);
+  const totalExpenses = categories.reduce(
+    (sum, cat) => sum + (cat.amount || 0) + (cat.expensesTotal || 0),
+    0
+  );
 
   return (
     <DashboardLayout>
@@ -109,7 +112,7 @@ const ExpenseCategories = () => {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
+            className="bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
           >
             + Add Expense
           </button>
@@ -131,7 +134,7 @@ const ExpenseCategories = () => {
         </div>
 
         {/* Total Summary */}
-        <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-8 rounded-lg shadow-lg mb-6">
+        <div className="bg-linear-to-r from-purple-500 to-purple-600 text-white p-8 rounded-lg shadow-lg mb-6">
           <p className="text-lg opacity-90">Total Category Expenses</p>
           <p className="text-5xl font-bold mt-2">
             ${totalExpenses.toLocaleString()}
@@ -146,53 +149,82 @@ const ExpenseCategories = () => {
 
         {/* Category Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {allCategoryNames.map((categoryName) => {
-            const categoryData = groupedCategories[categoryName];
-            const total = getCategoryTotal(categoryName);
+          {categories.map((cat) => {
+            const hasBucket = cat._id !== undefined;
+            const actualExpenses = cat.actualExpenses || [];
+            const total = (cat.amount || 0) + (cat.expensesTotal || 0);
 
             return (
               <div
-                key={categoryName}
+                key={cat._id || cat.category}
                 className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-200 hover:shadow-xl transition-shadow"
               >
-                <div className="bg-gradient-to-r from-gray-700 to-gray-800 text-white p-4">
-                  <h3 className="text-lg font-semibold">{categoryName}</h3>
+                <div className="bg-linear-to-r from-gray-700 to-gray-800 text-white p-4">
+                  <div className="flex justify-between items-center">
+                    <h3 className="text-lg font-semibold">{cat.category}</h3>
+                    {cat.isVirtual && (
+                      <span className="text-xs bg-blue-500 px-2 py-1 rounded">
+                        Transaction Only
+                      </span>
+                    )}
+                  </div>
                   <p className="text-3xl font-bold mt-2">
                     ${total.toLocaleString()}
                   </p>
                 </div>
                 <div className="p-4">
-                  {categoryData.length === 0 ? (
-                    <p className="text-gray-500 text-center py-4">
-                      No expenses recorded
-                    </p>
-                  ) : (
-                    <div className="space-y-2 max-h-64 overflow-y-auto">
-                      {categoryData.map((expense) => (
-                        <div
-                          key={expense._id}
-                          className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
-                        >
-                          <div>
-                            <p className="font-semibold text-gray-800">
-                              ${expense.amount.toLocaleString()}
-                            </p>
-                            {expense.description && (
-                              <p className="text-sm text-gray-600">
-                                {expense.description}
-                              </p>
-                            )}
-                          </div>
-                          <button
-                            onClick={() => handleDeleteExpense(expense._id)}
-                            className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
-                          >
-                            Delete
-                          </button>
+                  <div className="space-y-2 max-h-64 overflow-y-auto">
+                    {/* The Primary Bucket (if exists) */}
+                    {hasBucket && cat.amount > 0 && (
+                      <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg border border-purple-100">
+                        <div>
+                          <p className="font-semibold text-purple-800">
+                            ${cat.amount.toLocaleString()}
+                          </p>
+                          <p className="text-xs text-purple-600">
+                            Monthly Bucket
+                          </p>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                        <button
+                          onClick={() => handleDeleteExpense(cat._id)}
+                          className="text-red-600 hover:text-red-800 text-sm font-medium transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Individual Linked Expenses */}
+                    {actualExpenses.map((expense) => (
+                      <div
+                        key={expense._id}
+                        className="flex justify-between items-center p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors border border-gray-100"
+                      >
+                        <div>
+                          <p className="font-semibold text-gray-800">
+                            ${expense.amount.toLocaleString()}
+                          </p>
+                          <p className="text-xs text-blue-600 font-medium">
+                            {expense.title || "Untitled Expense"}
+                          </p>
+                          {expense.description && (
+                            <p className="text-xs text-gray-500 mt-1 italic">
+                              {expense.description}
+                            </p>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-gray-400">
+                          {new Date(expense.date).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ))}
+
+                    {cat.amount === 0 && actualExpenses.length === 0 && (
+                      <p className="text-gray-500 text-center py-4 text-sm">
+                        No spend recorded
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             );
@@ -299,7 +331,7 @@ const ExpenseCategories = () => {
                 <div className="flex gap-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
+                    className="flex-1 bg-linear-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
                   >
                     Add Expense
                   </button>

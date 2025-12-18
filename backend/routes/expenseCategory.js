@@ -7,10 +7,15 @@ const {
   createExpenseCategory,
   updateExpenseCategory,
   deleteExpenseCategory,
+  getUniqueCategories,
 } = require("../controllers/expenseCategoryController");
 
 // All routes require authentication
 router.use(auth);
+
+// @route   GET /api/expense-category/unique
+// @desc    Get all unique category names for a user
+router.get("/unique", getUniqueCategories);
 
 // @route   GET /api/expense-category
 // @desc    Get all expense categories with optional filtering

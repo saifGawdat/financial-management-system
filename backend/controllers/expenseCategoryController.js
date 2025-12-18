@@ -1,6 +1,8 @@
+const Expense = require("../models/Expense");
 const ExpenseCategory = require("../models/ExpenseCategory");
+const { calculateMonthlySummary } = require("./monthlySummaryController");
 
-// Get all expense categories with optional filtering
+// Get all expense categories with optional filtering and include matching individual expenses
 const getExpenseCategories = async (req, res) => {
   try {
     const { month, year } = req.query;
@@ -10,10 +12,66 @@ const getExpenseCategories = async (req, res) => {
     if (year) filter.year = parseInt(year);
 
     const categories = await ExpenseCategory.find(filter).sort({
-      year: -1,
-      month: -1,
       category: 1,
     });
+
+    // If we have a specific month/year, let's also fetch related individual expenses
+    if (month && year) {
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(
+        parseInt(year),
+        parseInt(month),
+        0,
+        23,
+        59,
+        59,
+        999
+      );
+
+      const allExpenses = await Expense.find({
+        user: req.userId,
+        date: { $gte: startDate, $lte: endDate },
+      });
+
+      // Merge data
+      const response = categories.map((cat) => {
+        const matchingExpenses = allExpenses.filter(
+          (e) => e.category === cat.category
+        );
+        return {
+          ...cat.toObject(),
+          actualExpenses: matchingExpenses,
+          expensesTotal: matchingExpenses.reduce((sum, e) => sum + e.amount, 0),
+        };
+      });
+
+      // Add categories that have expenses but NO bucket record (optional but helpful)
+      const bucketCategoryNames = new Set(categories.map((c) => c.category));
+      allExpenses.forEach((exp) => {
+        if (!bucketCategoryNames.has(exp.category)) {
+          // Find if we already added this "virtual" category to response
+          let virtualCat = response.find(
+            (r) => r.category === exp.category && r._id === undefined
+          );
+          if (!virtualCat) {
+            virtualCat = {
+              category: exp.category,
+              amount: 0, // No bucket amount
+              month: parseInt(month),
+              year: parseInt(year),
+              actualExpenses: [],
+              expensesTotal: 0,
+              isVirtual: true,
+            };
+            response.push(virtualCat);
+          }
+          virtualCat.actualExpenses.push(exp);
+          virtualCat.expensesTotal += exp.amount;
+        }
+      });
+
+      return res.json(response);
+    }
 
     res.json(categories);
   } catch (error) {
@@ -42,7 +100,9 @@ const getMonthlyExpenseBreakdown = async (req, res) => {
     };
 
     categories.forEach((cat) => {
-      breakdown[cat.category] += cat.amount;
+      if (breakdown.hasOwnProperty(cat.category)) {
+        breakdown[cat.category] += cat.amount;
+      }
       breakdown.total += cat.amount;
     });
 
@@ -84,6 +144,10 @@ const createExpenseCategory = async (req, res) => {
     });
 
     const savedCategory = await expenseCategory.save();
+
+    // Trigger summary recalculation
+    await calculateMonthlySummary(req.userId, month, year);
+
     res.status(201).json(savedCategory);
   } catch (error) {
     console.error("Error creating expense category:", error);
@@ -105,6 +169,9 @@ const updateExpenseCategory = async (req, res) => {
       return res.status(404).json({ message: "Expense category not found" });
     }
 
+    const oldMonth = expenseCategory.month;
+    const oldYear = expenseCategory.year;
+
     // Update fields if provided
     if (category !== undefined) expenseCategory.category = category;
     if (amount !== undefined) {
@@ -118,6 +185,20 @@ const updateExpenseCategory = async (req, res) => {
     if (description !== undefined) expenseCategory.description = description;
 
     const updatedCategory = await expenseCategory.save();
+
+    // Trigger summary recalculation for both old and new month if they changed
+    await calculateMonthlySummary(
+      req.userId,
+      updatedCategory.month,
+      updatedCategory.year
+    );
+    if (
+      oldMonth !== updatedCategory.month ||
+      oldYear !== updatedCategory.year
+    ) {
+      await calculateMonthlySummary(req.userId, oldMonth, oldYear);
+    }
+
     res.json(updatedCategory);
   } catch (error) {
     console.error("Error updating expense category:", error);
@@ -128,7 +209,7 @@ const updateExpenseCategory = async (req, res) => {
 // Delete expense category
 const deleteExpenseCategory = async (req, res) => {
   try {
-    const expenseCategory = await ExpenseCategory.findOneAndDelete({
+    const expenseCategory = await ExpenseCategory.findOne({
       _id: req.params.id,
       user: req.userId,
     });
@@ -137,9 +218,30 @@ const deleteExpenseCategory = async (req, res) => {
       return res.status(404).json({ message: "Expense category not found" });
     }
 
+    const { month, year } = expenseCategory;
+    const userId = req.userId;
+
+    await ExpenseCategory.findByIdAndDelete(req.params.id);
+
+    // Trigger summary recalculation
+    await calculateMonthlySummary(userId, month, year);
+
     res.json({ message: "Expense category deleted successfully" });
   } catch (error) {
     console.error("Error deleting expense category:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get all unique category names for a user
+const getUniqueCategories = async (req, res) => {
+  try {
+    const categories = await ExpenseCategory.distinct("category", {
+      user: req.userId,
+    });
+    res.json(categories);
+  } catch (error) {
+    console.error("Error fetching unique categories:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -150,4 +252,5 @@ module.exports = {
   createExpenseCategory,
   updateExpenseCategory,
   deleteExpenseCategory,
+  getUniqueCategories,
 };

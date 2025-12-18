@@ -1,11 +1,16 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
+import * as XLSX from "xlsx";
 import {
   getEmployees,
   createEmployee,
   updateEmployee,
   deleteEmployee,
+  addTransaction,
+  getTransactionsByMonth,
+  deleteTransaction,
 } from "../../api/employee";
+import { formatCurrency } from "../../utils/formatters";
 
 const Employee = () => {
   const [employees, setEmployees] = useState([]);
@@ -103,17 +108,90 @@ const Employee = () => {
     setShowModal(true);
   };
 
-  const filteredEmployees = employees.filter(
-    (emp) =>
-      emp.isActive &&
-      (emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        emp.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const [showAdjustmentsModal, setShowAdjustmentsModal] = useState(false);
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [transactions, setTransactions] = useState([]);
+  const [adjustmentFormData, setAdjustmentFormData] = useState({
+    employeeId: "",
+    type: "BONUS",
+    amount: "",
+    description: "",
+  });
 
-  const totalSalaries = filteredEmployees.reduce(
-    (sum, emp) => sum + emp.salary,
-    0
-  );
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+
+  const fetchTransactions = useCallback(async () => {
+    try {
+      const data = await getTransactionsByMonth(selectedMonth, selectedYear);
+      setTransactions(data);
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    }
+  }, [selectedMonth, selectedYear]);
+
+  // Fetch transactions on mount and when month/year changes
+  useEffect(() => {
+    fetchTransactions();
+  }, [fetchTransactions]);
+
+  const handleAddTransaction = async (e) => {
+    e.preventDefault();
+    try {
+      await addTransaction({
+        ...adjustmentFormData,
+        month: selectedMonth,
+        year: selectedYear,
+      });
+      setAdjustmentFormData({
+        ...adjustmentFormData,
+        amount: "",
+        description: "",
+      });
+      fetchTransactions();
+    } catch (error) {
+      console.error("Error adding transaction:", error);
+      alert("Failed to add transaction");
+    }
+  };
+
+  const handleDeleteTransaction = async (id) => {
+    if (window.confirm("Delete this adjustment?")) {
+      try {
+        await deleteTransaction(id);
+        fetchTransactions();
+      } catch (error) {
+        console.error("Error deleting transaction:", error);
+      }
+    }
+  };
+
+  const getEmployeeStats = (employee) => {
+    const empTransactions = transactions.filter(
+      (t) => t.employee._id === employee._id
+    );
+    const bonuses = empTransactions
+      .filter((t) => t.type === "BONUS")
+      .reduce((sum, t) => sum + t.amount, 0);
+    const deductions = empTransactions
+      .filter((t) => t.type === "DEDUCTION")
+      .reduce((sum, t) => sum + t.amount, 0);
+    const netSalary = employee.salary + bonuses - deductions;
+    return { bonuses, deductions, netSalary };
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -122,6 +200,53 @@ const Employee = () => {
       month: "short",
       day: "numeric",
     });
+  };
+
+  const filteredEmployees = employees.filter(
+    (emp) =>
+      emp.isActive &&
+      (emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        emp.jobTitle.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
+
+  const totalBaseSalaries = filteredEmployees.reduce(
+    (sum, emp) => sum + emp.salary,
+    0
+  );
+
+  const totalNetSalaries = filteredEmployees.reduce(
+    (sum, emp) => sum + getEmployeeStats(emp).netSalary,
+    0
+  );
+
+  const handleExportExcel = () => {
+    const dataToExport = filteredEmployees.map((emp) => {
+      const stats = getEmployeeStats(emp);
+      return {
+        "Employee Name": emp.name,
+        "Job Title": emp.jobTitle,
+        "Base Salary": emp.salary,
+        Bonuses: stats.bonuses,
+        Deductions: stats.deductions,
+        "Net Salary": stats.netSalary,
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Salaries");
+
+    // Auto-width columns
+    const max_width = dataToExport.reduce(
+      (w, r) => Math.max(w, r["Employee Name"].length),
+      10
+    );
+    worksheet["!cols"] = [{ wch: max_width }];
+
+    XLSX.writeFile(
+      workbook,
+      `Salaries for ${months[selectedMonth - 1]} ${selectedYear}.xlsx`
+    );
   };
 
   return (
@@ -133,15 +258,32 @@ const Employee = () => {
               Employee Management
             </h1>
             <p className="text-gray-600 mt-1">
-              Manage your employees and their salaries
+              Manage your employees and their salaries for{" "}
+              <span className="font-semibold text-blue-600">
+                {months[selectedMonth - 1]} {selectedYear}
+              </span>
             </p>
           </div>
-          <button
-            onClick={handleAddNew}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
-          >
-            + Add Employee
-          </button>
+          <div className="flex gap-4">
+            <button
+              onClick={handleExportExcel}
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+            >
+              <span>📊</span> Export to Excel
+            </button>
+            <button
+              onClick={() => setShowAdjustmentsModal(true)}
+              className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all shadow-sm hover:bg-gray-50 flex items-center gap-2"
+            >
+              <span>📅</span> Monthly Adjustments
+            </button>
+            <button
+              onClick={handleAddNew}
+              className="bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
+            >
+              + Add Employee
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -152,31 +294,33 @@ const Employee = () => {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg shadow-md border border-blue-200">
+          <div className="bg-linear-to-r from-blue-50 to-blue-100 p-6 rounded-lg shadow-md border border-blue-200">
             <p className="text-blue-700 text-sm font-medium">Total Employees</p>
             <p className="text-4xl font-bold text-blue-900 mt-2">
               {filteredEmployees.length}
             </p>
           </div>
-          <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-lg shadow-md border border-green-200">
+          <div className="bg-linear-to-r from-green-50 to-green-100 p-6 rounded-lg shadow-md border border-green-200">
             <p className="text-green-700 text-sm font-medium">
-              Total Monthly Salaries
+              Total Net Salaries
             </p>
             <p className="text-4xl font-bold text-green-900 mt-2">
-              ${totalSalaries.toLocaleString()}
+              {formatCurrency(totalNetSalaries)}
+            </p>
+            <p className="text-xs text-green-600 mt-1">
+              Base: {formatCurrency(totalBaseSalaries)}
             </p>
           </div>
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg shadow-md border border-purple-200">
+          <div className="bg-linear-to-r from-purple-50 to-purple-100 p-6 rounded-lg shadow-md border border-purple-200">
             <p className="text-purple-700 text-sm font-medium">
-              Average Salary
+              Average Net Salary
             </p>
             <p className="text-4xl font-bold text-purple-900 mt-2">
-              $
-              {filteredEmployees.length > 0
-                ? Math.round(
-                    totalSalaries / filteredEmployees.length
-                  ).toLocaleString()
-                : 0}
+              {formatCurrency(
+                filteredEmployees.length > 0
+                  ? totalNetSalaries / filteredEmployees.length
+                  : 0
+              )}
             </p>
           </div>
         </div>
@@ -205,7 +349,7 @@ const Employee = () => {
           ) : (
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+                <thead className="bg-linear-to-r from-gray-50 to-gray-100">
                   <tr>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       Name
@@ -214,13 +358,16 @@ const Employee = () => {
                       Job Title
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Phone
+                      Base Salary
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Date Joined
+                      Bonuses
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-                      Salary
+                      Deductions
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                      Net Salary
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       Actions
@@ -228,52 +375,72 @@ const Employee = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredEmployees.map((employee) => (
-                    <tr
-                      key={employee._id}
-                      className="hover:bg-blue-50 transition-colors"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-semibold text-gray-900">
-                          {employee.name}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-600">
-                          {employee.jobTitle}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-600">
-                          {employee.phoneNumber || "N/A"}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-600">
-                          {formatDate(employee.dateJoined)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-bold text-green-600">
-                          ${employee.salary.toLocaleString()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button
-                          onClick={() => handleEdit(employee)}
-                          className="text-blue-600 hover:text-blue-800 font-medium mr-4 transition-colors"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(employee._id)}
-                          className="text-red-600 hover:text-red-800 font-medium transition-colors"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {filteredEmployees.map((employee) => {
+                    const stats = getEmployeeStats(employee);
+                    return (
+                      <tr
+                        key={employee._id}
+                        className="hover:bg-blue-50 transition-colors"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-semibold text-gray-900">
+                            {employee.name}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            {employee.phoneNumber || "N/A"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-600">
+                            {employee.jobTitle}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            Joined: {formatDate(employee.dateJoined)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-600">
+                            {formatCurrency(employee.salary)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-green-600">
+                            {stats.bonuses > 0
+                              ? `+${stats.bonuses.toLocaleString()}`
+                              : "-"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-red-600">
+                            {stats.deductions > 0
+                              ? `-${stats.deductions.toLocaleString()}`
+                              : "-"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded w-fit">
+                            {formatCurrency(stats.netSalary)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleEdit(employee)}
+                              className="text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDelete(employee._id)}
+                              className="text-red-600 hover:text-red-800 font-medium transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -371,7 +538,7 @@ const Employee = () => {
                 <div className="flex gap-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
+                    className="flex-1 bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
                   >
                     {editingEmployee ? "Update Employee" : "Create Employee"}
                   </button>
@@ -394,6 +561,285 @@ const Employee = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Adjustments Modal */}
+        {showAdjustmentsModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl p-8 max-w-6xl w-full h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-800">
+                    Monthly Adjustments
+                  </h2>
+                  <p className="text-gray-600 mt-1">
+                    Manage bonuses and deductions for payroll
+                  </p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                    className="border-2 border-gray-300 rounded-md px-4 py-2 font-medium"
+                  >
+                    {months.map((m, i) => (
+                      <option key={i + 1} value={i + 1}>
+                        {m}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                    className="border-2 border-gray-300 rounded-md px-4 py-2 font-medium"
+                  >
+                    {[2024, 2025, 2026].map((y) => (
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    onClick={() => setShowAdjustmentsModal(false)}
+                    className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                  >
+                    &times;
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 overflow-hidden">
+                {/* Employee List & Net Salary Table */}
+                <div className="lg:col-span-2 overflow-y-auto pr-2">
+                  <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg">
+                    <thead className="bg-gray-50 sticky top-0">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">
+                          Employee
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase">
+                          Base Salary
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-bold text-green-700 uppercase">
+                          Bonuses
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-bold text-red-700 uppercase">
+                          Deductions
+                        </th>
+                        <th className="px-4 py-3 text-right text-xs font-bold text-blue-700 uppercase">
+                          Net Salary
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {filteredEmployees.map((emp) => {
+                        const stats = getEmployeeStats(emp);
+                        return (
+                          <tr key={emp._id} className="hover:bg-gray-50">
+                            <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                              {emp.name}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-right text-gray-600">
+                              {formatCurrency(emp.salary)}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-right text-green-600">
+                              {stats.bonuses > 0
+                                ? `+${stats.bonuses.toLocaleString()}`
+                                : "-"}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-right text-red-600">
+                              {stats.deductions > 0
+                                ? `-${stats.deductions.toLocaleString()}`
+                                : "-"}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-right font-bold text-blue-700">
+                              ${stats.netSalary.toLocaleString()}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                    <tfoot className="bg-gray-100 font-bold">
+                      <tr>
+                        <td className="px-4 py-3">Totals</td>
+                        <td className="px-4 py-3 text-right">
+                          $
+                          {filteredEmployees
+                            .reduce((sum, e) => sum + e.salary, 0)
+                            .toLocaleString()}
+                        </td>
+                        <td className="px-4 py-3 text-right text-green-700">
+                          $
+                          {transactions
+                            .filter((t) => t.type === "BONUS")
+                            .reduce((s, t) => s + t.amount, 0)
+                            .toLocaleString()}
+                        </td>
+                        <td className="px-4 py-3 text-right text-red-700">
+                          $
+                          {transactions
+                            .filter((t) => t.type === "DEDUCTION")
+                            .reduce((s, t) => s + t.amount, 0)
+                            .toLocaleString()}
+                        </td>
+                        <td className="px-4 py-3 text-right text-blue-800">
+                          $
+                          {filteredEmployees
+                            .reduce(
+                              (sum, e) => sum + getEmployeeStats(e).netSalary,
+                              0
+                            )
+                            .toLocaleString()}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+
+                {/* Add Transaction Form & History */}
+                <div className="flex flex-col gap-6 overflow-hidden">
+                  <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                    <h3 className="font-bold text-gray-800 mb-4">
+                      Add Adjustment
+                    </h3>
+                    <form onSubmit={handleAddTransaction}>
+                      <div className="mb-3">
+                        <label className="block text-xs font-bold text-gray-700 mb-1">
+                          Employee
+                        </label>
+                        <select
+                          className="w-full border-gray-300 rounded-md p-2 text-sm"
+                          value={adjustmentFormData.employeeId}
+                          onChange={(e) =>
+                            setAdjustmentFormData({
+                              ...adjustmentFormData,
+                              employeeId: e.target.value,
+                            })
+                          }
+                          required
+                        >
+                          <option value="">Select Employee</option>
+                          {filteredEmployees.map((emp) => (
+                            <option key={emp._id} value={emp._id}>
+                              {emp.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1">
+                            Type
+                          </label>
+                          <select
+                            className="w-full border-gray-300 rounded-md p-2 text-sm"
+                            value={adjustmentFormData.type}
+                            onChange={(e) =>
+                              setAdjustmentFormData({
+                                ...adjustmentFormData,
+                                type: e.target.value,
+                              })
+                            }
+                          >
+                            <option value="BONUS">Bonus (+)</option>
+                            <option value="DEDUCTION">Deduction (-)</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-bold text-gray-700 mb-1">
+                            Amount
+                          </label>
+                          <input
+                            type="number"
+                            className="w-full border-gray-300 rounded-md p-2 text-sm"
+                            value={adjustmentFormData.amount}
+                            onChange={(e) =>
+                              setAdjustmentFormData({
+                                ...adjustmentFormData,
+                                amount: e.target.value,
+                              })
+                            }
+                            required
+                            min="0"
+                          />
+                        </div>
+                      </div>
+                      <div className="mb-3">
+                        <label className="block text-xs font-bold text-gray-700 mb-1">
+                          Description
+                        </label>
+                        <input
+                          type="text"
+                          className="w-full border-gray-300 rounded-md p-2 text-sm"
+                          value={adjustmentFormData.description}
+                          onChange={(e) =>
+                            setAdjustmentFormData({
+                              ...adjustmentFormData,
+                              description: e.target.value,
+                            })
+                          }
+                          placeholder="Reason (optional)"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-medium text-sm"
+                      >
+                        Add Adjustment
+                      </button>
+                    </form>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto bg-white border border-gray-200 rounded-lg">
+                    <div className="p-3 bg-gray-50 border-b border-gray-200 font-bold text-sm">
+                      Recent Adjustments ({selectedMonth}/{selectedYear})
+                    </div>
+                    {transactions.length === 0 ? (
+                      <p className="p-4 text-center text-gray-500 text-sm">
+                        No adjustments for this month.
+                      </p>
+                    ) : (
+                      <ul className="divide-y divide-gray-100">
+                        {transactions.map((t) => (
+                          <li
+                            key={t._id}
+                            className="p-3 hover:bg-gray-50 flex justify-between items-center group"
+                          >
+                            <div>
+                              <div className="text-sm font-medium text-gray-800">
+                                {t.employee?.name || "Unknown Employee"}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {t.type === "BONUS" ? "Bonus" : "Deduction"}
+                                {t.description && ` • ${t.description}`}
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div
+                                className={`text-sm font-bold ${
+                                  t.type === "BONUS"
+                                    ? "text-green-600"
+                                    : "text-red-600"
+                                }`}
+                              >
+                                {t.type === "BONUS" ? "+" : "-"}${t.amount}
+                              </div>
+                              <button
+                                onClick={() => handleDeleteTransaction(t._id)}
+                                className="text-xs text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         )}

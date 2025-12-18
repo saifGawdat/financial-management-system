@@ -35,3 +35,21 @@ export const deleteEmployee = async (id) => {
   const response = await axios.delete(`/employee/${id}`);
   return response.data;
 };
+
+// Add transaction (Bonus/Deduction)
+export const addTransaction = async (transactionData) => {
+  const response = await axios.post("/employee/transaction", transactionData);
+  return response.data;
+};
+
+// Get transactions by month
+export const getTransactionsByMonth = async (month, year) => {
+  const response = await axios.get(`/employee/transaction/${month}/${year}`);
+  return response.data;
+};
+
+// Delete transaction
+export const deleteTransaction = async (id) => {
+  const response = await axios.delete(`/employee/transaction/${id}`);
+  return response.data;
+};

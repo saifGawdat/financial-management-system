@@ -69,7 +69,7 @@ const MonthlySalaries = () => {
         </div>
 
         {/* Total Salaries Card */}
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-8 rounded-lg shadow mb-6">
+        <div className="bg-linear-to-r from-blue-500 to-blue-600 text-white p-8 rounded-lg shadow mb-6">
           <p className="text-xl opacity-90">
             Total Salaries for {getMonthName(month)} {year}
           </p>

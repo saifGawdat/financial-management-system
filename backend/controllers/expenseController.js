@@ -1,4 +1,5 @@
 const Expense = require("../models/Expense");
+const { calculateMonthlySummary } = require("./monthlySummaryController");
 
 // Add expense
 exports.addExpense = async (req, res) => {
@@ -15,6 +16,15 @@ exports.addExpense = async (req, res) => {
     });
 
     await expense.save();
+
+    // Trigger summary recalculation
+    const d = new Date(expense.date);
+    await calculateMonthlySummary(
+      req.userId,
+      d.getMonth() + 1,
+      d.getFullYear()
+    );
+
     res.status(201).json(expense);
   } catch (error) {
     console.error(error);
@@ -25,7 +35,24 @@ exports.addExpense = async (req, res) => {
 // Get all expenses for user
 exports.getExpenses = async (req, res) => {
   try {
-    const expenses = await Expense.find({ user: req.userId }).sort({
+    const { month, year } = req.query;
+    const query = { user: req.userId };
+
+    if (month && year) {
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(
+        parseInt(year),
+        parseInt(month),
+        0,
+        23,
+        59,
+        59,
+        999
+      );
+      query.date = { $gte: startDate, $lte: endDate };
+    }
+
+    const expenses = await Expense.find(query).sort({
       date: -1,
     });
     res.json(expenses);
@@ -49,7 +76,16 @@ exports.deleteExpense = async (req, res) => {
       return res.status(401).json({ error: "Not authorized" });
     }
 
+    const d = new Date(expense.date);
+    const userId = req.userId;
+    const month = d.getMonth() + 1;
+    const year = d.getFullYear();
+
     await Expense.findByIdAndDelete(req.params.id);
+
+    // Trigger summary recalculation
+    await calculateMonthlySummary(userId, month, year);
+
     res.json({ message: "Expense deleted successfully" });
   } catch (error) {
     console.error(error);

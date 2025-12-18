@@ -1,28 +1,27 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import Card from "../../components/ui/Card";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import TransactionList from "../../components/dashboard/TransactionList";
 import Modal from "../../components/ui/Modal";
+import MonthYearSelector from "../../components/ui/MonthYearSelector";
 import API from "../../api/axios";
+import { getUniqueCategories } from "../../api/expenseCategory";
 import { exportExpenseToExcel } from "../../utils/exportToExcel";
+import { formatCurrency } from "../../utils/formatters";
 import { IoAddCircleOutline, IoDownloadOutline } from "react-icons/io5";
 
-const EXPENSE_CATEGORIES = [
-  "Food",
-  "Transport",
-  "Shopping",
-  "Entertainment",
-  "Health",
-  "Bills",
-  "Education",
-  "Other",
-];
+// Categories are now dynamic and fetched from the server
 
 const Expense = () => {
+  const currentDate = new Date();
   const [expenses, setExpenses] = useState([]);
+  const [userCategories, setUserCategories] = useState([]);
+  const [month, setMonth] = useState(currentDate.getMonth() + 1);
+  const [year, setYear] = useState(currentDate.getFullYear());
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     amount: "",
@@ -31,18 +30,35 @@ const Expense = () => {
     description: "",
   });
 
-  useEffect(() => {
-    fetchExpenses();
+  const fetchUserCategories = useCallback(async () => {
+    try {
+      const data = await getUniqueCategories();
+      setUserCategories(data);
+    } catch (error) {
+      console.error("Error fetching user categories:", error);
+    }
   }, []);
 
-  const fetchExpenses = async () => {
+  useEffect(() => {
+    fetchUserCategories();
+  }, [fetchUserCategories]);
+
+  const fetchExpenses = useCallback(async () => {
     try {
-      const res = await API.get("/expense");
-      setExpenses(res.data);
+      const res = await API.get("/expense", {
+        params: { month, year },
+      });
+      if (Array.isArray(res.data)) {
+        setExpenses(res.data);
+      }
     } catch (error) {
       console.error("Error fetching expenses:", error);
     }
-  };
+  }, [month, year]);
+
+  useEffect(() => {
+    fetchExpenses();
+  }, [fetchExpenses]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -50,6 +66,7 @@ const Expense = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(""); // Clear previous errors
     try {
       await API.post("/expense", formData);
       setIsModalOpen(false);
@@ -63,6 +80,11 @@ const Expense = () => {
       fetchExpenses();
     } catch (error) {
       console.error("Error adding expense:", error);
+      const msg =
+        error.response?.data?.error ||
+        error.response?.data?.message ||
+        "Failed to add expense. Please check your connection.";
+      setError(msg);
     }
   };
 
@@ -94,12 +116,23 @@ const Expense = () => {
             <h1 className="text-3xl font-bold text-gray-800">
               Expense Management
             </h1>
-            <p className="text-gray-600 mt-1">
-              Total Expenses:{" "}
-              <span className="text-red-600 font-bold text-xl">
-                ${totalExpense.toFixed(2)}
-              </span>
-            </p>
+            <div className="flex items-center gap-4 mt-2">
+              <p className="text-gray-600">
+                Total Expenses:{" "}
+                <span className="text-red-600 font-bold text-xl">
+                  {formatCurrency(totalExpense)}
+                </span>
+              </p>
+              <div className="h-6 w-px bg-gray-300 mx-2"></div>
+              <MonthYearSelector
+                onSelect={(m, y) => {
+                  setMonth(m);
+                  setYear(y);
+                }}
+                initialMonth={month}
+                initialYear={year}
+              />
+            </div>
           </div>
           <div className="flex gap-3">
             <Button
@@ -134,6 +167,11 @@ const Expense = () => {
           title="Add New Expense"
         >
           <form onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4 text-sm">
+                {error}
+              </div>
+            )}
             <Input
               label="Title"
               name="title"
@@ -143,7 +181,7 @@ const Expense = () => {
               required
             />
             <Input
-              label="Amount"
+              label="Amount ($)"
               type="number"
               name="amount"
               value={formData.amount}
@@ -162,11 +200,15 @@ const Expense = () => {
                 required
                 className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               >
-                {EXPENSE_CATEGORIES.map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
+                <option value="Other">Other</option>
+                {Array.isArray(userCategories) &&
+                  userCategories
+                    .filter((cat) => cat && cat !== "Other")
+                    .map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
               </select>
             </div>
             <Input

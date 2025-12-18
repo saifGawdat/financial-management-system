@@ -3,12 +3,13 @@ const Income = require("../models/Income");
 const Expense = require("../models/Expense");
 const ExpenseCategory = require("../models/ExpenseCategory");
 const Employee = require("../models/Employee");
+const EmployeeTransaction = require("../models/EmployeeTransaction");
 
 // Calculate and get monthly summary
 const getMonthlySummary = async (req, res) => {
   try {
     const { month, year } = req.params;
-    const userId = req.user.id;
+    const userId = req.userId;
 
     // Try to find existing summary
     let summary = await MonthlySummary.findOne({
@@ -17,7 +18,7 @@ const getMonthlySummary = async (req, res) => {
       year: parseInt(year),
     });
 
-    // If not found or needs recalculation, calculate it
+    // If not found, calculate it
     if (!summary) {
       summary = await calculateMonthlySummary(
         userId,
@@ -36,7 +37,7 @@ const getMonthlySummary = async (req, res) => {
 // Get all monthly summaries
 const getAllMonthlySummaries = async (req, res) => {
   try {
-    const summaries = await MonthlySummary.find({ user: req.user.id }).sort({
+    const summaries = await MonthlySummary.find({ user: req.userId }).sort({
       year: -1,
       month: -1,
     });
@@ -52,7 +53,7 @@ const getAllMonthlySummaries = async (req, res) => {
 const recalculateMonthlySummary = async (req, res) => {
   try {
     const { month, year } = req.params;
-    const userId = req.user.id;
+    const userId = req.userId;
 
     const summary = await calculateMonthlySummary(
       userId,
@@ -76,65 +77,80 @@ async function calculateMonthlySummary(
   forceUpdate = false
 ) {
   try {
-    // Get all income for the month
-    const incomes = await Income.find({ user: userId, month, year });
+    // Define date range for the month
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
 
-    // Calculate income breakdown
-    let monthlyCollections = 0;
-    let advertisingExpenses = 0;
-
-    incomes.forEach((income) => {
-      if (income.type === "Monthly Collections") {
-        monthlyCollections += income.amount;
-      } else if (income.type === "Advertising Expenses") {
-        advertisingExpenses += income.amount;
-      }
+    // 1. Calculate Total Income
+    const incomes = await Income.find({
+      user: userId,
+      date: { $gte: startDate, $lte: endDate },
     });
+    const totalIncome = incomes.reduce((sum, inc) => sum + inc.amount, 0);
 
-    const totalIncome = monthlyCollections;
-
-    // Get all regular expenses for the month
-    const expenses = await Expense.find({ user: userId, month, year });
-    const regularExpenses = expenses.reduce(
-      (sum, expense) => sum + expense.amount,
+    // 2. Calculate Total Expenses
+    // Regular Expenses (from Expense model)
+    const expenses = await Expense.find({
+      user: userId,
+      date: { $gte: startDate, $lte: endDate },
+    });
+    const regularExpensesTotal = expenses.reduce(
+      (sum, exp) => sum + exp.amount,
       0
     );
 
-    // Get expense categories for the month
+    // Categorized Monthly Expenses (from ExpenseCategory model)
     const expenseCategories = await ExpenseCategory.find({
       user: userId,
       month,
       year,
     });
+    const categoryExpensesTotal = expenseCategories.reduce(
+      (sum, cat) => sum + cat.amount,
+      0
+    );
 
+    const totalExpenses = regularExpensesTotal + categoryExpensesTotal;
+
+    // 3. Calculate Total Salaries (Base + Bonuses - Deductions)
+    const activeEmployees = await Employee.find({
+      user: userId,
+      isActive: true,
+    });
+    const totalBaseSalary = activeEmployees.reduce(
+      (sum, emp) => sum + emp.salary,
+      0
+    );
+
+    const transactions = await EmployeeTransaction.find({
+      user: userId,
+      month,
+      year,
+    });
+    const totalBonuses = transactions
+      .filter((t) => t.type === "BONUS")
+      .reduce((sum, t) => sum + t.amount, 0);
+    const totalDeductions = transactions
+      .filter((t) => t.type === "DEDUCTION")
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    const totalSalaries = totalBaseSalary + totalBonuses - totalDeductions;
+
+    // 4. Calculate Profit
+    const profit = totalIncome - totalExpenses - totalSalaries;
+
+    // Build breakdown for storage (optional, for UI backward compatibility)
     const expenseBreakdown = {
       Transportation: 0,
       Repair: 0,
       Equipment: 0,
-      regularExpenses: regularExpenses,
+      regularExpenses: regularExpensesTotal,
     };
-
     expenseCategories.forEach((cat) => {
-      expenseBreakdown[cat.category] += cat.amount;
+      if (expenseBreakdown.hasOwnProperty(cat.category)) {
+        expenseBreakdown[cat.category] += cat.amount;
+      }
     });
-
-    const categoryExpensesTotal =
-      expenseBreakdown.Transportation +
-      expenseBreakdown.Repair +
-      expenseBreakdown.Equipment;
-
-    const totalExpenses =
-      regularExpenses + categoryExpensesTotal + advertisingExpenses;
-
-    // Get active employees and calculate total salaries
-    const employees = await Employee.find({ user: userId, isActive: true });
-    const totalSalaries = employees.reduce(
-      (sum, employee) => sum + employee.salary,
-      0
-    );
-
-    // Calculate profit
-    const profit = totalIncome - totalExpenses - totalSalaries;
 
     // Update or create summary
     const summary = await MonthlySummary.findOneAndUpdate(
@@ -146,8 +162,8 @@ async function calculateMonthlySummary(
         profit,
         expenseBreakdown,
         incomeBreakdown: {
-          monthlyCollections,
-          advertisingExpenses,
+          monthlyCollections: totalIncome, // Defaulting for simple display
+          advertisingExpenses: 0,
         },
       },
       { new: true, upsert: true, setDefaultsOnInsert: true }

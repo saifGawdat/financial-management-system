@@ -6,6 +6,7 @@ import {
   getAllMonthlySummaries,
   recalculateMonthlySummary,
 } from "../../api/monthlySummary";
+import { formatCurrency } from "../../utils/formatters";
 
 const ProfitSummary = () => {
   const currentDate = new Date();
@@ -24,6 +25,7 @@ const ProfitSummary = () => {
     } else {
       fetchAllSummaries();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [month, year, viewMode]);
 
   const fetchMonthlySummary = async () => {
@@ -160,15 +162,15 @@ const ProfitSummary = () => {
                 <div
                   className={`p-8 rounded-lg shadow mb-6 ${
                     summary.profit >= 0
-                      ? "bg-gradient-to-r from-green-500 to-green-600"
-                      : "bg-gradient-to-r from-red-500 to-red-600"
+                      ? "bg-linear-to-r from-green-500 to-green-600"
+                      : "bg-linear-to-r from-red-500 to-red-600"
                   } text-white`}
                 >
                   <p className="text-xl opacity-90">
                     {getMonthName(summary.month)} {summary.year} Profit
                   </p>
                   <p className="text-5xl font-bold mt-2">
-                    ${Math.abs(summary.profit).toLocaleString()}
+                    {formatCurrency(Math.abs(summary.profit))}
                   </p>
                   <p className="text-lg opacity-75 mt-1">
                     {summary.profit >= 0 ? "Profit" : "Loss"}
@@ -180,19 +182,19 @@ const ProfitSummary = () => {
                   <div className="bg-white p-6 rounded-lg shadow">
                     <p className="text-gray-600 text-sm">Total Income</p>
                     <p className="text-3xl font-bold text-green-600 mt-2">
-                      ${summary.totalIncome.toLocaleString()}
+                      {formatCurrency(summary.totalIncome)}
                     </p>
                   </div>
                   <div className="bg-white p-6 rounded-lg shadow">
                     <p className="text-gray-600 text-sm">Total Expenses</p>
                     <p className="text-3xl font-bold text-red-600 mt-2">
-                      ${summary.totalExpenses.toLocaleString()}
+                      {formatCurrency(summary.totalExpenses)}
                     </p>
                   </div>
                   <div className="bg-white p-6 rounded-lg shadow">
                     <p className="text-gray-600 text-sm">Total Salaries</p>
                     <p className="text-3xl font-bold text-blue-600 mt-2">
-                      ${summary.totalSalaries.toLocaleString()}
+                      {formatCurrency(summary.totalSalaries)}
                     </p>
                   </div>
                 </div>
@@ -208,8 +210,9 @@ const ProfitSummary = () => {
                         Monthly Collections
                       </p>
                       <p className="text-2xl font-bold text-green-600 mt-1">
-                        $
-                        {summary.incomeBreakdown.monthlyCollections.toLocaleString()}
+                        {formatCurrency(
+                          summary.incomeBreakdown.monthlyCollections
+                        )}
                       </p>
                     </div>
                     <div className="p-4 bg-red-50 rounded-lg">
@@ -217,8 +220,9 @@ const ProfitSummary = () => {
                         Advertising Expenses
                       </p>
                       <p className="text-2xl font-bold text-red-600 mt-1">
-                        $
-                        {summary.incomeBreakdown.advertisingExpenses.toLocaleString()}
+                        {formatCurrency(
+                          summary.incomeBreakdown.advertisingExpenses
+                        )}
                       </p>
                     </div>
                   </div>
@@ -235,20 +239,21 @@ const ProfitSummary = () => {
                         Transportation
                       </p>
                       <p className="text-2xl font-bold text-gray-800 mt-1">
-                        $
-                        {summary.expenseBreakdown.Transportation.toLocaleString()}
+                        {formatCurrency(
+                          summary.expenseBreakdown.Transportation
+                        )}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <p className="text-gray-700 font-medium">Repair</p>
                       <p className="text-2xl font-bold text-gray-800 mt-1">
-                        ${summary.expenseBreakdown.Repair.toLocaleString()}
+                        {formatCurrency(summary.expenseBreakdown.Repair)}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
                       <p className="text-gray-700 font-medium">Equipment</p>
                       <p className="text-2xl font-bold text-gray-800 mt-1">
-                        ${summary.expenseBreakdown.Equipment.toLocaleString()}
+                        {formatCurrency(summary.expenseBreakdown.Equipment)}
                       </p>
                     </div>
                     <div className="p-4 bg-gray-50 rounded-lg">
@@ -256,8 +261,9 @@ const ProfitSummary = () => {
                         Regular Expenses
                       </p>
                       <p className="text-2xl font-bold text-gray-800 mt-1">
-                        $
-                        {summary.expenseBreakdown.regularExpenses.toLocaleString()}
+                        {formatCurrency(
+                          summary.expenseBreakdown.regularExpenses
+                        )}
                       </p>
                     </div>
                   </div>
@@ -315,17 +321,17 @@ const ProfitSummary = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-semibold text-green-600">
-                            ${s.totalIncome.toLocaleString()}
+                            {formatCurrency(s.totalIncome)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-semibold text-red-600">
-                            ${s.totalExpenses.toLocaleString()}
+                            {formatCurrency(s.totalExpenses)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-semibold text-blue-600">
-                            ${s.totalSalaries.toLocaleString()}
+                            {formatCurrency(s.totalSalaries)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -334,7 +340,7 @@ const ProfitSummary = () => {
                               s.profit >= 0 ? "text-green-600" : "text-red-600"
                             }`}
                           >
-                            ${Math.abs(s.profit).toLocaleString()}
+                            {formatCurrency(Math.abs(s.profit))}
                             {s.profit >= 0 ? " ↑" : " ↓"}
                           </div>
                         </td>

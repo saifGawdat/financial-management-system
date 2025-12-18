@@ -8,6 +8,9 @@ const {
   createEmployee,
   updateEmployee,
   deleteEmployee,
+  addTransaction,
+  getTransactionsByMonth,
+  deleteTransaction,
 } = require("../controllers/employeeController");
 
 // All routes require authentication
@@ -36,5 +39,17 @@ router.put("/:id", updateEmployee);
 // @route   DELETE /api/employee/:id
 // @desc    Delete employee (soft delete)
 router.delete("/:id", deleteEmployee);
+
+// @route   POST /api/employee/transaction
+// @desc    Add bonus or deduction
+router.post("/transaction", addTransaction);
+
+// @route   GET /api/employee/transaction/:month/:year
+// @desc    Get transactions for a specific month
+router.get("/transaction/:month/:year", getTransactionsByMonth);
+
+// @route   DELETE /api/employee/transaction/:id
+// @desc    Delete a transaction
+router.delete("/transaction/:id", deleteTransaction);
 
 module.exports = router;

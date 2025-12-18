@@ -35,3 +35,9 @@ export const deleteExpenseCategory = async (id) => {
   const response = await axios.delete(`/expense-category/${id}`);
   return response.data;
 };
+
+// Get all unique category names for a user
+export const getUniqueCategories = async () => {
+  const response = await axios.get("/expense-category/unique");
+  return response.data;
+};

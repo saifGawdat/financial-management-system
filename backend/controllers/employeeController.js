@@ -140,6 +140,95 @@ const deleteEmployee = async (req, res) => {
   }
 };
 
+// Transaction Management
+const EmployeeTransaction = require("../models/EmployeeTransaction");
+const { calculateMonthlySummary } = require("./monthlySummaryController");
+
+// Add transaction (bonus/deduction)
+const addTransaction = async (req, res) => {
+  try {
+    const { employeeId, type, amount, month, year, description } = req.body;
+
+    if (!employeeId || !type || !amount || !month || !year) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    const employee = await Employee.findOne({
+      _id: employeeId,
+      user: req.userId,
+    });
+
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+
+    const transaction = new EmployeeTransaction({
+      user: req.userId,
+      employee: employeeId,
+      type,
+      amount,
+      month,
+      year,
+      description,
+    });
+
+    await transaction.save();
+
+    // Trigger summary recalculation
+    await calculateMonthlySummary(req.userId, month, year);
+
+    res.status(201).json(transaction);
+  } catch (error) {
+    console.error("Error adding transaction:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get transactions for a month
+const getTransactionsByMonth = async (req, res) => {
+  try {
+    const { month, year } = req.params;
+
+    const transactions = await EmployeeTransaction.find({
+      user: req.userId,
+      month: parseInt(month),
+      year: parseInt(year),
+    }).populate("employee", "name");
+
+    res.json(transactions);
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Delete transaction
+const deleteTransaction = async (req, res) => {
+  try {
+    const transaction = await EmployeeTransaction.findOne({
+      _id: req.params.id,
+      user: req.userId,
+    });
+
+    if (!transaction) {
+      return res.status(404).json({ message: "Adjustment not found" });
+    }
+
+    const { month, year } = transaction;
+    const userId = req.userId;
+
+    await EmployeeTransaction.findByIdAndDelete(req.params.id);
+
+    // Trigger summary recalculation
+    await calculateMonthlySummary(userId, month, year);
+
+    res.json({ message: "Adjustment deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting transaction:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   getEmployees,
   getActiveEmployees,
@@ -147,4 +236,7 @@ module.exports = {
   createEmployee,
   updateEmployee,
   deleteEmployee,
+  addTransaction,
+  getTransactionsByMonth,
+  deleteTransaction,
 };

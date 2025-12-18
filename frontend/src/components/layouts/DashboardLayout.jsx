@@ -29,7 +29,6 @@ const DashboardLayout = ({ children }) => {
     { path: "/dashboard", icon: IoHomeOutline, label: "Dashboard" },
     { path: "/income", icon: IoWalletOutline, label: "Income" },
     { path: "/expense", icon: IoCartOutline, label: "Expenses" },
-    { path: "/warehouse", icon: IoCartOutline, label: "Warehouse" },
     { path: "/employees", icon: IoPeopleOutline, label: "Employees" },
     {
       path: "/expense-categories",

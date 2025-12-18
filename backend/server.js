@@ -22,7 +22,6 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/income", require("./routes/income"));
 app.use("/api/expense", require("./routes/expense"));
 app.use("/api/dashboard", require("./routes/dashboard"));
-app.use("/api/warehouse", require("./routes/warehouse"));
 app.use("/api/employee", require("./routes/employee"));
 app.use("/api/expense-category", require("./routes/expenseCategory"));
 app.use("/api/monthly-summary", require("./routes/monthlySummary"));
