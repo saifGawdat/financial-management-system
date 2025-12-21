@@ -15,6 +15,7 @@ import Employee from "./pages/Dashboard/Employee";
 import ExpenseCategories from "./pages/Dashboard/ExpenseCategories";
 import MonthlySalaries from "./pages/Dashboard/MonthlySalaries";
 import ProfitSummary from "./pages/Dashboard/ProfitSummary";
+import Customers from "./pages/Dashboard/Customers";
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -91,6 +92,14 @@ function App() {
           element={
             <ProtectedRoute>
               <ProfitSummary />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/customers"
+          element={
+            <ProtectedRoute>
+              <Customers />
             </ProtectedRoute>
           }
         />

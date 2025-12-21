@@ -30,6 +30,10 @@ const incomeSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  customer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Customer",
+  },
   createdAt: {
     type: Date,
     default: Date.now,

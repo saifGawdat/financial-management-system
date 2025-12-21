@@ -11,7 +11,7 @@ connectDB();
 // Middleware
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: process.env.FRONTEND_URL,
     credentials: true,
   })
 );
@@ -25,6 +25,7 @@ app.use("/api/dashboard", require("./routes/dashboard"));
 app.use("/api/employee", require("./routes/employee"));
 app.use("/api/expense-category", require("./routes/expenseCategory"));
 app.use("/api/monthly-summary", require("./routes/monthlySummary"));
+app.use("/api/customer", require("./routes/customer"));
 
 // Health check route
 app.get("/", (req, res) => {

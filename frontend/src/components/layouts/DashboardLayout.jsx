@@ -45,6 +45,7 @@ const DashboardLayout = ({ children }) => {
       icon: IoStatsChartOutline,
       label: "Profit Summary",
     },
+    { path: "/customers", icon: IoPeopleOutline, label: "Customers" },
   ];
 
   return (
