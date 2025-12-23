@@ -82,19 +82,19 @@ const Income = () => {
   return (
     <DashboardLayout>
       <div>
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">
+        <div className="flex flex-col md:flex-row justify-between items-center md:items-center mb-6 gap-6 text-center md:text-left">
+          <div className="w-full">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
               Income Management
             </h1>
-            <div className="flex items-center gap-4 mt-2">
+            <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 mt-2 justify-center md:justify-start">
               <p className="text-gray-600">
                 Total Income:{" "}
                 <span className="text-green-600 font-bold text-xl">
                   {formatCurrency(totalIncome)}
                 </span>
               </p>
-              <div className="h-6 w-px bg-gray-300 mx-2"></div>
+              <div className="hidden md:block h-6 w-px bg-gray-300 mx-2"></div>
               <MonthYearSelector
                 onSelect={(m, y) => {
                   setMonth(m);
@@ -105,18 +105,18 @@ const Income = () => {
               />
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <Button
               onClick={handleExport}
               variant="outline"
-              className="flex items-center gap-2"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               <IoDownloadOutline size={20} />
               Export to Excel
             </Button>
             <Button
               onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-2"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               <IoAddCircleOutline size={20} />
               Add Income

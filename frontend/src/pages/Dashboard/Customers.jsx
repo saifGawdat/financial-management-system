@@ -141,21 +141,23 @@ const Customers = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+      <div className="p-4 md:p-6">
+        <div className="flex flex-col md:flex-row justify-between items-center md:items-center gap-6 mb-8 text-center md:text-left">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Customers</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+              Customers
+            </h1>
             <p className="text-gray-500 mt-2">
               Monthly subscribers and payment tracking
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap justify-center items-center gap-3 w-full md:w-auto">
             {/* Month Selector */}
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-              className="px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+              className="px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-purple-500 outline-none transition-all flex-1 sm:flex-none"
             >
               {months.map((m, i) => (
                 <option key={m} value={i + 1}>
@@ -168,7 +170,7 @@ const Customers = () => {
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              className="px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-purple-500 outline-none transition-all"
+              className="px-4 py-2 bg-white border border-gray-200 rounded-xl shadow-sm focus:ring-2 focus:ring-purple-500 outline-none transition-all flex-1 sm:flex-none"
             >
               {years.map((y) => (
                 <option key={y} value={y}>
@@ -179,14 +181,14 @@ const Customers = () => {
 
             <button
               onClick={handleExport}
-              className="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-xl flex items-center gap-2 transition-all shadow-sm border border-gray-200 font-semibold"
+              className="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-xl flex items-center justify-center gap-2 transition-all shadow-sm border border-gray-200 font-semibold w-full sm:w-auto"
             >
               <IoDownloadOutline size={20} />
               <span>Export</span>
             </button>
             <button
               onClick={() => setShowAddModal(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 transition-all shadow-lg hover:shadow-purple-200"
+              className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-purple-200 w-full sm:w-auto"
             >
               <IoAddOutline size={20} />
               <span>Add</span>

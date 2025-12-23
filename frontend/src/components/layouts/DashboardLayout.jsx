@@ -49,35 +49,51 @@ const DashboardLayout = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="h-screen bg-gray-50">
       {/* Mobile header */}
-      <div className="lg:hidden bg-white shadow-sm p-4 flex justify-between items-center">
-        <h1 className="text-xl font-bold text-purple-600">Expense Tracker</h1>
-        <button onClick={() => setSidebarOpen(!sidebarOpen)}>
+      <div className="lg:hidden bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-40">
+        <button
+          onClick={() => setSidebarOpen(!sidebarOpen)}
+          className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+        >
           {sidebarOpen ? (
             <IoCloseOutline size={28} />
           ) : (
             <IoMenuOutline size={28} />
           )}
         </button>
+        <h1 className="text-xl font-bold text-purple-600 absolute left-1/2 -translate-x-1/2">
+          Expense Tracker
+        </h1>
+        <div className="w-10"></div> {/* Spacer to keep title centered */}
       </div>
 
       <div className="flex">
         {/* Sidebar */}
         <aside
           className={`
-          fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out h-screen flex flex-col
+          fixed lg:static inset-y-0 left-0 z-60 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out h-screen flex flex-col
           ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }
         `}
         >
           {/* Header */}
-          <div className="p-6 border-b border-gray-200">
-            <h1 className="text-2xl font-bold text-purple-600">
-              Expense Tracker
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">Welcome, {user?.name}</p>
+          <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+            <div>
+              <h1 className="text-2xl font-bold text-purple-600">
+                Expense Tracker
+              </h1>
+              <p className="text-sm text-gray-500 mt-1">
+                Welcome, {user?.name}
+              </p>
+            </div>
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden p-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+            >
+              <IoCloseOutline size={28} />
+            </button>
           </div>
 
           {/* Navigation - takes up available space and scrolls if needed */}
@@ -117,13 +133,15 @@ const DashboardLayout = ({ children }) => {
         {/* Overlay for mobile */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+            className="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         {/* Main content */}
-        <main className="flex-1 p-4 lg:p-8  ">{children}</main>
+        <main className="flex-1 p-4 lg:p-8 w-full max-w-full overflow-x-hidden">
+          {children}
+        </main>
       </div>
     </div>
   );

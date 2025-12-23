@@ -100,10 +100,10 @@ const ExpenseCategories = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">
+      <div className="p-4 md:p-6">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-6 text-center md:text-left">
+          <div className="w-full">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
               Expense Categories
             </h1>
             <p className="text-gray-600 mt-1">
@@ -112,7 +112,7 @@ const ExpenseCategories = () => {
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
+            className="w-full md:w-auto bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
           >
             + Add Expense
           </button>
@@ -125,7 +125,7 @@ const ExpenseCategories = () => {
         )}
 
         {/* Month/Year Selector */}
-        <div className="bg-white p-6 rounded-lg shadow-lg mb-6 border border-gray-200">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow-lg mb-6 border border-gray-200 flex justify-center md:justify-start">
           <MonthYearSelector
             onSelect={handleMonthYearChange}
             initialMonth={month}
@@ -134,12 +134,14 @@ const ExpenseCategories = () => {
         </div>
 
         {/* Total Summary */}
-        <div className="bg-linear-to-r from-purple-500 to-purple-600 text-white p-8 rounded-lg shadow-lg mb-6">
-          <p className="text-lg opacity-90">Total Category Expenses</p>
-          <p className="text-5xl font-bold mt-2">
+        <div className="bg-linear-to-r from-purple-500 to-purple-600 text-white p-6 md:p-8 rounded-lg shadow-lg mb-6 text-center md:text-left">
+          <p className="text-base md:text-lg opacity-90">
+            Total Category Expenses
+          </p>
+          <p className="text-3xl md:text-5xl font-bold mt-2">
             ${totalExpenses.toLocaleString()}
           </p>
-          <p className="text-sm opacity-75 mt-1">
+          <p className="text-xs md:text-sm opacity-75 mt-1">
             {new Date(year, month - 1).toLocaleDateString("en-US", {
               month: "long",
               year: "numeric",

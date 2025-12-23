@@ -43,9 +43,9 @@ const MonthlySalaries = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">
+      <div className="p-4 md:p-6">
+        <div className="mb-8 text-center md:text-left">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
             Monthly Salaries Summary
           </h1>
           <p className="text-gray-600 mt-1">
@@ -60,7 +60,7 @@ const MonthlySalaries = () => {
         )}
 
         {/* Month/Year Selector */}
-        <div className="bg-white p-6 rounded-lg shadow mb-6">
+        <div className="bg-white p-4 md:p-6 rounded-lg shadow mb-6 flex justify-center md:justify-start">
           <MonthYearSelector
             onSelect={handleMonthYearChange}
             initialMonth={month}
@@ -69,14 +69,14 @@ const MonthlySalaries = () => {
         </div>
 
         {/* Total Salaries Card */}
-        <div className="bg-linear-to-r from-blue-500 to-blue-600 text-white p-8 rounded-lg shadow mb-6">
-          <p className="text-xl opacity-90">
+        <div className="bg-linear-to-r from-blue-500 to-blue-600 text-white p-6 md:p-8 rounded-lg shadow mb-6 text-center md:text-left">
+          <p className="text-lg md:text-xl opacity-90">
             Total Salaries for {getMonthName(month)} {year}
           </p>
-          <p className="text-5xl font-bold mt-2">
+          <p className="text-3xl md:text-5xl font-bold mt-2">
             ${totalSalaries.toLocaleString()}
           </p>
-          <p className="text-lg opacity-75 mt-1">
+          <p className="text-base md:text-lg opacity-75 mt-1">
             {employees.length} Active Employee
             {employees.length !== 1 ? "s" : ""}
           </p>

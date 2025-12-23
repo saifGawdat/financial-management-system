@@ -58,8 +58,8 @@ const Home = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-96">
-          <div className="text-xl text-gray-500">Loading...</div>
+        <div className="flex justify-center p-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
         </div>
       </DashboardLayout>
     );
@@ -67,9 +67,9 @@ const Home = () => {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-center md:items-center mb-6 gap-4 text-center md:text-left">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
             Dashboard Overview
           </h1>
           <p className="text-gray-600 mt-1">
@@ -80,14 +80,16 @@ const Home = () => {
             })}
           </p>
         </div>
-        <MonthYearSelector
-          onSelect={(m, y) => {
-            setMonth(m);
-            setYear(y);
-          }}
-          initialMonth={month}
-          initialYear={year}
-        />
+        <div className="w-full md:w-auto flex justify-center">
+          <MonthYearSelector
+            onSelect={(m, y) => {
+              setMonth(m);
+              setYear(y);
+            }}
+            initialMonth={month}
+            initialYear={year}
+          />
+        </div>
       </div>
 
       {/* Summary Cards */}

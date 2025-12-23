@@ -84,9 +84,11 @@ const ProfitSummary = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">Profit Summary</h1>
+      <div className="p-4 md:p-6">
+        <div className="mb-8 text-center md:text-left">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+            Profit Summary
+          </h1>
           <p className="text-gray-600 mt-1">
             View monthly profit and financial overview
           </p>
@@ -105,11 +107,11 @@ const ProfitSummary = () => {
         )}
 
         {/* View Mode Toggle */}
-        <div className="bg-white p-4 rounded-lg shadow mb-6">
-          <div className="flex gap-4">
+        <div className="bg-white p-4 rounded-lg shadow mb-6 overflow-x-auto">
+          <div className="flex gap-4 justify-center md:justify-start min-w-max">
             <button
               onClick={() => setViewMode("single")}
-              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-6 py-2 rounded-lg font-medium transition-colors flex-1 md:flex-none ${
                 viewMode === "single"
                   ? "bg-blue-600 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -119,7 +121,7 @@ const ProfitSummary = () => {
             </button>
             <button
               onClick={() => setViewMode("all")}
-              className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+              className={`px-6 py-2 rounded-lg font-medium transition-colors flex-1 md:flex-none ${
                 viewMode === "all"
                   ? "bg-blue-600 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -133,16 +135,18 @@ const ProfitSummary = () => {
         {viewMode === "single" ? (
           <>
             {/* Month/Year Selector */}
-            <div className="bg-white p-6 rounded-lg shadow mb-6 flex justify-between items-center">
-              <MonthYearSelector
-                onSelect={handleMonthYearChange}
-                initialMonth={month}
-                initialYear={year}
-              />
+            <div className="bg-white p-4 md:p-6 rounded-lg shadow mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+              <div className="flex justify-center w-full md:w-auto">
+                <MonthYearSelector
+                  onSelect={handleMonthYearChange}
+                  initialMonth={month}
+                  initialYear={year}
+                />
+              </div>
               <button
                 onClick={handleRecalculate}
                 disabled={recalculating}
-                className={`px-6 py-2 rounded-lg font-medium transition-colors ${
+                className={`w-full md:w-auto px-6 py-3 rounded-lg font-medium transition-colors ${
                   recalculating
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-green-600 hover:bg-green-700"

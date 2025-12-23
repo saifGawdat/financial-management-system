@@ -251,10 +251,10 @@ const Employee = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800">
+      <div className="p-4 md:p-6">
+        <div className="flex flex-col md:flex-row justify-between items-center md:items-center mb-6 gap-6 text-center md:text-left">
+          <div className="w-full">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
               Employee Management
             </h1>
             <p className="text-gray-600 mt-1">
@@ -264,22 +264,22 @@ const Employee = () => {
               </span>
             </p>
           </div>
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <button
               onClick={handleExportExcel}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               <span>📊</span> Export to Excel
             </button>
             <button
               onClick={() => setShowAdjustmentsModal(true)}
-              className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all shadow-sm hover:bg-gray-50 flex items-center gap-2"
+              className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all shadow-sm hover:bg-gray-50 flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               <span>📅</span> Monthly Adjustments
             </button>
             <button
               onClick={handleAddNew}
-              className="bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg"
+              className="bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg w-full sm:w-auto"
             >
               + Add Employee
             </button>
