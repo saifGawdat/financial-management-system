@@ -6,7 +6,7 @@ const AuthLayout = ({ children }) => {
       <div className="w-full max-w-md">
         <div className="text-center mb-6 md:mb-10">
           <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 tracking-tight">
-            Expense Tracker
+            Financial Management System
           </h1>
           <p className="text-blue-100/80 text-sm md:text-base">
             Manage your finances with ease

@@ -9,7 +9,7 @@ const Button = ({
   disabled = false,
 }) => {
   const baseClasses =
-    "px-6 py-3 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
+    "px-6 py-3 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
 
   const variants = {
     primary:

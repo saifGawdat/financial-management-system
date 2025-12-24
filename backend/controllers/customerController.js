@@ -36,15 +36,11 @@ exports.getCustomers = async (req, res) => {
     }
 
     // Find all income records for these customers in the given month/year
-    const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+    const startDate = new Date(
+      Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0)
+    );
     const endDate = new Date(
-      parseInt(year),
-      parseInt(month),
-      0,
-      23,
-      59,
-      59,
-      999
+      Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999)
     );
 
     const payments = await Income.find({
@@ -136,15 +132,11 @@ exports.unpayCustomer = async (req, res) => {
     const customerId = req.params.id;
 
     // Find the income record for this customer in this month
-    const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+    const startDate = new Date(
+      Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0)
+    );
     const endDate = new Date(
-      parseInt(year),
-      parseInt(month),
-      0,
-      23,
-      59,
-      59,
-      999
+      Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999)
     );
 
     const income = await Income.findOne({

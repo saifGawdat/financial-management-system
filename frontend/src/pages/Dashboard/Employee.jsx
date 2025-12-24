@@ -26,6 +26,8 @@ const Employee = () => {
   });
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAddingTransaction, setIsAddingTransaction] = useState(false);
 
   useEffect(() => {
     fetchEmployees();
@@ -46,7 +48,9 @@ const Employee = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setError("");
+    setIsSubmitting(true);
 
     try {
       if (editingEmployee) {
@@ -63,10 +67,12 @@ const Employee = () => {
         dateJoined: new Date().toISOString().split("T")[0],
       });
       setEditingEmployee(null);
-      fetchEmployees();
+      await fetchEmployees();
     } catch (error) {
       console.error("Error saving employee:", error);
       setError(error.response?.data?.message || "Failed to save employee");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -150,6 +156,8 @@ const Employee = () => {
 
   const handleAddTransaction = async (e) => {
     e.preventDefault();
+    if (isAddingTransaction) return;
+    setIsAddingTransaction(true);
     try {
       await addTransaction({
         ...adjustmentFormData,
@@ -161,10 +169,12 @@ const Employee = () => {
         amount: "",
         description: "",
       });
-      fetchTransactions();
+      await fetchTransactions();
     } catch (error) {
       console.error("Error adding transaction:", error);
       alert("Failed to add transaction");
+    } finally {
+      setIsAddingTransaction(false);
     }
   };
 
@@ -180,16 +190,16 @@ const Employee = () => {
   };
 
   const getEmployeeStats = (employee) => {
-    const empTransactions = transactions.filter(
-      (t) => t.employee._id === employee._id
+    const employeeTransactions = transactions.filter(
+      (t) => t.employee && t.employee._id === employee._id
     );
-    const bonuses = empTransactions
+    const bonuses = employeeTransactions
       .filter((t) => t.type === "BONUS")
-      .reduce((sum, t) => sum + t.amount, 0);
-    const deductions = empTransactions
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+    const deductions = employeeTransactions
       .filter((t) => t.type === "DEDUCTION")
-      .reduce((sum, t) => sum + t.amount, 0);
-    const netSalary = employee.salary + bonuses - deductions;
+      .reduce((sum, t) => sum + Number(t.amount || 0), 0);
+    const netSalary = Number(employee.salary || 0) + bonuses - deductions;
     return { bonuses, deductions, netSalary };
   };
 
@@ -449,13 +459,13 @@ const Employee = () => {
 
         {/* Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 shadow-2xl">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+            <div className="bg-white rounded-3xl p-8 max-w-2xl w-full mx-4 shadow-2xl animate-in zoom-in duration-200">
               <h2 className="text-3xl font-bold mb-6 text-gray-800">
                 {editingEmployee ? "Edit Employee" : "Add New Employee"}
               </h2>
               <form onSubmit={handleSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 border-0">
                   <div className="mb-4">
                     <label className="block text-gray-700 font-semibold mb-2">
                       Name *
@@ -466,7 +476,7 @@ const Employee = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, name: e.target.value })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       required
                     />
                   </div>
@@ -480,13 +490,13 @@ const Employee = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, jobTitle: e.target.value })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       required
                     />
                   </div>
                   <div className="mb-4">
                     <label className="block text-gray-700 font-semibold mb-2">
-                      Monthly Salary ($) *
+                      Monthly Salary (£) *
                     </label>
                     <input
                       type="number"
@@ -494,7 +504,7 @@ const Employee = () => {
                       onChange={(e) =>
                         setFormData({ ...formData, salary: e.target.value })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       required
                       min="0"
                       step="0.01"
@@ -513,7 +523,7 @@ const Employee = () => {
                           phoneNumber: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       placeholder="(123) 456-7890"
                     />
                   </div>
@@ -530,7 +540,7 @@ const Employee = () => {
                           dateJoined: e.target.value,
                         })
                       }
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                       required
                     />
                   </div>
@@ -538,9 +548,14 @@ const Employee = () => {
                 <div className="flex gap-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
+                    className="flex-1 bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg disabled:bg-blue-300 disabled:cursor-not-allowed"
+                    disabled={isSubmitting}
                   >
-                    {editingEmployee ? "Update Employee" : "Create Employee"}
+                    {isSubmitting
+                      ? "Saving..."
+                      : editingEmployee
+                      ? "Update Employee"
+                      : "Create Employee"}
                   </button>
                   <button
                     type="button"
@@ -555,7 +570,7 @@ const Employee = () => {
                         dateJoined: new Date().toISOString().split("T")[0],
                       });
                     }}
-                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 py-3 rounded-lg font-semibold transition-all"
+                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 py-3 rounded-xl font-semibold transition-all"
                   >
                     Cancel
                   </button>
@@ -567,8 +582,8 @@ const Employee = () => {
 
         {/* Adjustments Modal */}
         {showAdjustmentsModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-8 max-w-6xl w-full h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-300">
+            <div className="bg-white rounded-3xl p-8 max-w-6xl w-full h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in zoom-in duration-200">
               <div className="flex justify-between items-center mb-6">
                 <div>
                   <h2 className="text-3xl font-bold text-gray-800">
@@ -603,7 +618,7 @@ const Employee = () => {
                   </select>
                   <button
                     onClick={() => setShowAdjustmentsModal(false)}
-                    className="text-gray-500 hover:text-gray-700 text-2xl font-bold"
+                    className="text-gray-500 hover:text-gray-700 text-2xl font-bold md:relative md:right-0 md:top-0 absolute right-0 top-0"
                   >
                     &times;
                   </button>
@@ -655,7 +670,7 @@ const Employee = () => {
                                 : "-"}
                             </td>
                             <td className="px-4 py-3 text-sm text-right font-bold text-blue-700">
-                              ${stats.netSalary.toLocaleString()}
+                              £{stats.netSalary.toLocaleString()}
                             </td>
                           </tr>
                         );
@@ -665,30 +680,32 @@ const Employee = () => {
                       <tr>
                         <td className="px-4 py-3">Totals</td>
                         <td className="px-4 py-3 text-right">
-                          $
+                          £
                           {filteredEmployees
-                            .reduce((sum, e) => sum + e.salary, 0)
+                            .reduce((sum, e) => sum + Number(e.salary || 0), 0)
                             .toLocaleString()}
                         </td>
                         <td className="px-4 py-3 text-right text-green-700">
-                          $
+                          £
                           {transactions
                             .filter((t) => t.type === "BONUS")
-                            .reduce((s, t) => s + t.amount, 0)
+                            .reduce((s, t) => s + Number(t.amount || 0), 0)
                             .toLocaleString()}
                         </td>
                         <td className="px-4 py-3 text-right text-red-700">
-                          $
+                          £
                           {transactions
                             .filter((t) => t.type === "DEDUCTION")
-                            .reduce((s, t) => s + t.amount, 0)
+                            .reduce((s, t) => s + Number(t.amount || 0), 0)
                             .toLocaleString()}
                         </td>
                         <td className="px-4 py-3 text-right text-blue-800">
-                          $
+                          £
                           {filteredEmployees
                             .reduce(
-                              (sum, e) => sum + getEmployeeStats(e).netSalary,
+                              (sum, e) =>
+                                sum +
+                                Number(getEmployeeStats(e).netSalary || 0),
                               0
                             )
                             .toLocaleString()}
@@ -699,7 +716,7 @@ const Employee = () => {
                 </div>
 
                 {/* Add Transaction Form & History */}
-                <div className="flex flex-col gap-6 overflow-hidden">
+                <div className="flex flex-col gap-6 overflow-hidden ">
                   <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
                     <h3 className="font-bold text-gray-800 mb-4">
                       Add Adjustment
@@ -710,7 +727,7 @@ const Employee = () => {
                           Employee
                         </label>
                         <select
-                          className="w-full border-gray-300 rounded-md p-2 text-sm"
+                          className="w-full border-gray-200 rounded-xl p-3 text-sm bg-white border-2 text-center"
                           value={adjustmentFormData.employeeId}
                           onChange={(e) =>
                             setAdjustmentFormData({
@@ -734,7 +751,7 @@ const Employee = () => {
                             Type
                           </label>
                           <select
-                            className="w-full border-gray-300 rounded-md p-2 text-sm"
+                            className="w-full bg-white border-gray-200 border-2 rounded-xl p-3 text-sm text-center"
                             value={adjustmentFormData.type}
                             onChange={(e) =>
                               setAdjustmentFormData({
@@ -753,7 +770,7 @@ const Employee = () => {
                           </label>
                           <input
                             type="number"
-                            className="w-full border-gray-300 rounded-md p-2 text-sm"
+                            className="w-full bg-white border-gray-200 border-2 rounded-xl p-3 text-sm text-center"
                             value={adjustmentFormData.amount}
                             onChange={(e) =>
                               setAdjustmentFormData({
@@ -772,7 +789,7 @@ const Employee = () => {
                         </label>
                         <input
                           type="text"
-                          className="w-full border-gray-300 rounded-md p-2 text-sm"
+                          className="w-full border-gray-200 rounded-xl p-3 text-sm bg-white border-2"
                           value={adjustmentFormData.description}
                           onChange={(e) =>
                             setAdjustmentFormData({
@@ -785,9 +802,10 @@ const Employee = () => {
                       </div>
                       <button
                         type="submit"
-                        className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-medium text-sm"
+                        className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 font-medium text-sm disabled:bg-blue-300 disabled:cursor-not-allowed"
+                        disabled={isAddingTransaction}
                       >
-                        Add Adjustment
+                        {isAddingTransaction ? "Adding..." : "Add Adjustment"}
                       </button>
                     </form>
                   </div>
@@ -824,7 +842,7 @@ const Employee = () => {
                                     : "text-red-600"
                                 }`}
                               >
-                                {t.type === "BONUS" ? "+" : "-"}${t.amount}
+                                {t.type === "BONUS" ? "+" : "-"}£{t.amount}
                               </div>
                               <button
                                 onClick={() => handleDeleteTransaction(t._id)}

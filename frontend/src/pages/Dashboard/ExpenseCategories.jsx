@@ -19,6 +19,7 @@ const ExpenseCategories = () => {
     amount: "",
     description: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const defaultCategories = ["Transportation", "Repair", "Equipment"];
 
@@ -43,7 +44,9 @@ const ExpenseCategories = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setError("");
+    setIsSubmitting(true);
     try {
       await createExpenseCategory({
         category: formData.category,
@@ -54,13 +57,15 @@ const ExpenseCategories = () => {
       });
       setShowModal(false);
       setFormData({ category: "", amount: "", description: "" });
-      fetchCategories();
+      await fetchCategories();
     } catch (error) {
       console.error("Error adding expense category:", error);
       const msg =
         error.response?.data?.message ||
         "Failed to add expense category. Please try again.";
       setError(msg);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -94,7 +99,8 @@ const ExpenseCategories = () => {
 
   const allCategoryNames = [...new Set(categories.map((c) => c.category))];
   const totalExpenses = categories.reduce(
-    (sum, cat) => sum + (cat.amount || 0) + (cat.expensesTotal || 0),
+    (sum, cat) =>
+      sum + Number(cat.amount || 0) + Number(cat.expensesTotal || 0),
     0
   );
 
@@ -119,7 +125,7 @@ const ExpenseCategories = () => {
         </div>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-xl mb-4 flex items-center gap-2 animate-pulse">
             {error}
           </div>
         )}
@@ -139,7 +145,7 @@ const ExpenseCategories = () => {
             Total Category Expenses
           </p>
           <p className="text-3xl md:text-5xl font-bold mt-2">
-            ${totalExpenses.toLocaleString()}
+            £{totalExpenses.toLocaleString()}
           </p>
           <p className="text-xs md:text-sm opacity-75 mt-1">
             {new Date(year, month - 1).toLocaleDateString("en-US", {
@@ -171,7 +177,7 @@ const ExpenseCategories = () => {
                     )}
                   </div>
                   <p className="text-3xl font-bold mt-2">
-                    ${total.toLocaleString()}
+                    £{total.toLocaleString()}
                   </p>
                 </div>
                 <div className="p-4">
@@ -181,7 +187,7 @@ const ExpenseCategories = () => {
                       <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg border border-purple-100">
                         <div>
                           <p className="font-semibold text-purple-800">
-                            ${cat.amount.toLocaleString()}
+                            £{cat.amount.toLocaleString()}
                           </p>
                           <p className="text-xs text-purple-600">
                             Monthly Bucket
@@ -204,7 +210,7 @@ const ExpenseCategories = () => {
                       >
                         <div>
                           <p className="font-semibold text-gray-800">
-                            ${expense.amount.toLocaleString()}
+                            £{expense.amount.toLocaleString()}
                           </p>
                           <p className="text-xs text-blue-600 font-medium">
                             {expense.title || "Untitled Expense"}
@@ -252,7 +258,7 @@ const ExpenseCategories = () => {
                         {categoryName}
                       </span>
                       <span className="font-semibold text-gray-800">
-                        ${total.toLocaleString()} ({percentage.toFixed(1)}%)
+                        £{total.toLocaleString()} ({percentage.toFixed(1)}%)
                       </span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-3">
@@ -270,8 +276,8 @@ const ExpenseCategories = () => {
 
         {/* Add Expense Modal */}
         {showModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-300">
+            <div className="bg-white rounded-3xl w-full max-w-lg p-8 shadow-2xl relative animate-in zoom-in duration-200">
               <h2 className="text-3xl font-bold mb-6 text-gray-800">
                 Add Expense
               </h2>
@@ -287,7 +293,7 @@ const ExpenseCategories = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, category: e.target.value })
                     }
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                     placeholder="e.g., Transportation, Repair, Equipment"
                     required
                   />
@@ -302,7 +308,7 @@ const ExpenseCategories = () => {
                 </div>
                 <div className="mb-4">
                   <label className="block text-gray-700 font-semibold mb-2">
-                    Amount ($) *
+                    Amount (£) *
                   </label>
                   <input
                     type="number"
@@ -310,7 +316,7 @@ const ExpenseCategories = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, amount: e.target.value })
                     }
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                     required
                     min="0"
                     step="0.01"
@@ -325,7 +331,7 @@ const ExpenseCategories = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, description: e.target.value })
                     }
-                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                     rows="3"
                     placeholder="Optional notes..."
                   />
@@ -333,9 +339,10 @@ const ExpenseCategories = () => {
                 <div className="flex gap-4">
                   <button
                     type="submit"
-                    className="flex-1 bg-linear-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 rounded-lg font-semibold transition-all shadow-md hover:shadow-lg"
+                    className="flex-1 bg-linear-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white py-3 rounded-xl font-semibold transition-all shadow-md hover:shadow-lg disabled:bg-purple-300 disabled:cursor-not-allowed"
+                    disabled={isSubmitting}
                   >
-                    Add Expense
+                    {isSubmitting ? "Adding..." : "Add Expense"}
                   </button>
                   <button
                     type="button"
@@ -347,7 +354,7 @@ const ExpenseCategories = () => {
                         description: "",
                       });
                     }}
-                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 py-3 rounded-lg font-semibold transition-all"
+                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 py-3 rounded-xl font-semibold transition-all"
                   >
                     Cancel
                   </button>

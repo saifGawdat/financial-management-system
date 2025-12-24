@@ -11,15 +11,11 @@ exports.getStats = async (req, res) => {
     const query = { user: req.userId };
 
     if (month && year) {
-      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const startDate = new Date(
+        Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0)
+      );
       const endDate = new Date(
-        parseInt(year),
-        parseInt(month),
-        0,
-        23,
-        59,
-        59,
-        999
+        Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999)
       );
       query.date = { $gte: startDate, $lte: endDate };
     }
@@ -84,15 +80,11 @@ exports.getChartData = async (req, res) => {
 
     if (month && year) {
       // Data for specific month
-      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const startDate = new Date(
+        Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0)
+      );
       const endDate = new Date(
-        parseInt(year),
-        parseInt(month),
-        0,
-        23,
-        59,
-        59,
-        999
+        Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999)
       );
 
       incomes = await Income.find({
@@ -323,15 +315,11 @@ exports.getRecentTransactions = async (req, res) => {
     const query = { user: req.userId };
 
     if (month && year) {
-      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const startDate = new Date(
+        Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0)
+      );
       const endDate = new Date(
-        parseInt(year),
-        parseInt(month),
-        0,
-        23,
-        59,
-        59,
-        999
+        Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999)
       );
       query.date = { $gte: startDate, $lte: endDate };
     }

@@ -1,5 +1,9 @@
+
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
+import Modal from "../../components/ui/Modal";
+import Input from "../../components/ui/Input";
+import Button from "../../components/ui/Button";
 import { customerAPI } from "../../api/customer";
 import {
   IoAddOutline,
@@ -24,6 +28,7 @@ const Customers = () => {
     phoneNumber: "",
     monthlyAmount: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchCustomers();
@@ -87,6 +92,8 @@ const Customers = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       await customerAPI.create(formData);
       setShowAddModal(false);
@@ -99,6 +106,8 @@ const Customers = () => {
       fetchCustomers();
     } catch (error) {
       console.error("Error creating customer:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -248,7 +257,7 @@ const Customers = () => {
                             Monthly
                           </p>
                           <p className="font-bold text-purple-600 text-lg">
-                            $
+                            £
                             {parseFloat(
                               customer.monthlyAmount
                             ).toLocaleString()}
@@ -320,91 +329,64 @@ const Customers = () => {
       </div>
 
       {/* Add Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl w-full max-w-md p-8 shadow-2xl animate-in zoom-in duration-200">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">
-              Add New Customer
-            </h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Customer Name
-                </label>
-                <input
-                  required
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                  placeholder="e.g. John Doe"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Brand/Company Name
-                </label>
-                <input
-                  type="text"
-                  value={formData.brandName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, brandName: e.target.value })
-                  }
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                  placeholder="e.g. Acme Corp"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number
-                </label>
-                <input
-                  required
-                  type="text"
-                  value={formData.phoneNumber}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phoneNumber: e.target.value })
-                  }
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                  placeholder="e.g. +1234567890"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Monthly Amount
-                </label>
-                <input
-                  required
-                  type="number"
-                  value={formData.monthlyAmount}
-                  onChange={(e) =>
-                    setFormData({ ...formData, monthlyAmount: e.target.value })
-                  }
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                  placeholder="e.g. 500"
-                />
-              </div>
-              <div className="flex gap-4 pt-4">
-                <button
-                  type="button"
-                  onClick={() => setShowAddModal(false)}
-                  className="flex-1 px-6 py-3 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-all font-semibold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-xl transition-all font-semibold shadow-lg shadow-purple-200"
-                >
-                  Create
-                </button>
-              </div>
-            </form>
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        title="Add New Customer"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input
+            label="Customer Name"
+            required
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="e.g. John Doe"
+          />
+          <Input
+            label="Brand/Company Name"
+            value={formData.brandName}
+            onChange={(e) =>
+              setFormData({ ...formData, brandName: e.target.value })
+            }
+            placeholder="e.g. Acme Corp"
+          />
+          <Input
+            label="Phone Number"
+            required
+            value={formData.phoneNumber}
+            onChange={(e) =>
+              setFormData({ ...formData, phoneNumber: e.target.value })
+            }
+            placeholder="e.g. +1234567890"
+          />
+          <Input
+            label="Monthly Amount"
+            required
+            type="number"
+            value={formData.monthlyAmount}
+            onChange={(e) =>
+              setFormData({ ...formData, monthlyAmount: e.target.value })
+            }
+            placeholder="e.g. 500"
+          />
+          <div className="flex gap-4 pt-4">
+            <Button
+              variant="secondary"
+              onClick={() => setShowAddModal(false)}
+              className="flex-1"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="flex-1"
+            >
+              {isSubmitting ? "Creating..." : "Create"}
+            </Button>
           </div>
-        </div>
-      )}
+        </form>
+      </Modal>
     </DashboardLayout>
   );
 };

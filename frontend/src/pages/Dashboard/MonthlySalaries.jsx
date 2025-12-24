@@ -33,7 +33,10 @@ const MonthlySalaries = () => {
     setYear(newYear);
   };
 
-  const totalSalaries = employees.reduce((sum, emp) => sum + emp.salary, 0);
+  const totalSalaries = employees.reduce(
+    (sum, emp) => sum + Number(emp.salary || 0),
+    0
+  );
 
   const getMonthName = (monthNum) => {
     return new Date(2000, monthNum - 1).toLocaleDateString("en-US", {
@@ -60,7 +63,7 @@ const MonthlySalaries = () => {
         )}
 
         {/* Month/Year Selector */}
-        <div className="bg-white p-4 md:p-6 rounded-lg shadow mb-6 flex justify-center md:justify-start">
+        <div className="bg-white p-4 md:p-6 rounded-2xl shadow-md mb-6 flex justify-center md:justify-start border border-gray-100">
           <MonthYearSelector
             onSelect={handleMonthYearChange}
             initialMonth={month}
@@ -69,12 +72,13 @@ const MonthlySalaries = () => {
         </div>
 
         {/* Total Salaries Card */}
-        <div className="bg-linear-to-r from-blue-500 to-blue-600 text-white p-6 md:p-8 rounded-lg shadow mb-6 text-center md:text-left">
+        <div className="bg-linear-to-r from-blue-600 to-indigo-700 text-white p-6 md:p-8 rounded-3xl shadow-xl mb-6 text-center md:text-left relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
           <p className="text-lg md:text-xl opacity-90">
             Total Salaries for {getMonthName(month)} {year}
           </p>
           <p className="text-3xl md:text-5xl font-bold mt-2">
-            ${totalSalaries.toLocaleString()}
+            £{totalSalaries.toLocaleString()}
           </p>
           <p className="text-base md:text-lg opacity-75 mt-1">
             {employees.length} Active Employee
@@ -83,7 +87,7 @@ const MonthlySalaries = () => {
         </div>
 
         {/* Employee Salaries Table */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
           {loading ? (
             <div className="p-8 text-center text-gray-500">
               Loading employees...
@@ -132,7 +136,7 @@ const MonthlySalaries = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm font-semibold text-blue-600">
-                            ${employee.salary.toLocaleString()}
+                            £{employee.salary.toLocaleString()}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -140,7 +144,7 @@ const MonthlySalaries = () => {
                             <div className="text-sm text-gray-600 mr-2">
                               {percentage.toFixed(1)}%
                             </div>
-                            <div className="w-24 bg-gray-200 rounded-full h-2">
+                            <div className="w-24 bg-gray-100 rounded-full h-2 overflow-hidden">
                               <div
                                 className="bg-blue-600 h-2 rounded-full"
                                 style={{ width: `${percentage}%` }}
@@ -162,7 +166,7 @@ const MonthlySalaries = () => {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-bold text-blue-600">
-                        ${totalSalaries.toLocaleString()}
+                        £{totalSalaries.toLocaleString()}
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -180,22 +184,22 @@ const MonthlySalaries = () => {
         {/* Summary Stats */}
         {employees.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            <div className="bg-white p-6 rounded-lg shadow">
+            <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
               <p className="text-gray-600 text-sm">Average Salary</p>
               <p className="text-3xl font-bold text-gray-800 mt-2">
-                ${Math.round(totalSalaries / employees.length).toLocaleString()}
+                £{Math.round(totalSalaries / employees.length).toLocaleString()}
               </p>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow">
+            <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
               <p className="text-gray-600 text-sm">Highest Salary</p>
               <p className="text-3xl font-bold text-green-600 mt-2">
-                ${Math.max(...employees.map((e) => e.salary)).toLocaleString()}
+                £{Math.max(...employees.map((e) => e.salary)).toLocaleString()}
               </p>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow">
+            <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
               <p className="text-gray-600 text-sm">Lowest Salary</p>
               <p className="text-3xl font-bold text-orange-600 mt-2">
-                ${Math.min(...employees.map((e) => e.salary)).toLocaleString()}
+                £{Math.min(...employees.map((e) => e.salary)).toLocaleString()}
               </p>
             </div>
           </div>

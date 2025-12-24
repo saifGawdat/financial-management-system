@@ -51,7 +51,7 @@ const DashboardLayout = ({ children }) => {
   return (
     <div className="h-screen bg-gray-50">
       {/* Mobile header */}
-      <div className="lg:hidden bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-40">
+      <div className="lg:hidden bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-30">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
           className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
@@ -62,8 +62,8 @@ const DashboardLayout = ({ children }) => {
             <IoMenuOutline size={28} />
           )}
         </button>
-        <h1 className="text-xl font-bold text-purple-600 absolute left-1/2 -translate-x-1/2">
-          Expense Tracker
+        <h1 className="text-md font-bold text-purple-600 absolute left-1/2 -translate-x-1/2 text-center ">
+          Financial Management System
         </h1>
         <div className="w-10"></div> {/* Spacer to keep title centered */}
       </div>
@@ -72,7 +72,7 @@ const DashboardLayout = ({ children }) => {
         {/* Sidebar */}
         <aside
           className={`
-          fixed lg:static inset-y-0 left-0 z-60 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out h-screen flex flex-col
+          fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out h-screen flex flex-col
           ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }
@@ -82,7 +82,7 @@ const DashboardLayout = ({ children }) => {
           <div className="p-6 border-b border-gray-200 flex justify-between items-center">
             <div>
               <h1 className="text-2xl font-bold text-purple-600">
-                Expense Tracker
+                Financial Management System
               </h1>
               <p className="text-sm text-gray-500 mt-1">
                 Welcome, {user?.name}
@@ -133,7 +133,7 @@ const DashboardLayout = ({ children }) => {
         {/* Overlay for mobile */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-50 lg:hidden"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden animate-in fade-in duration-300"
             onClick={() => setSidebarOpen(false)}
           />
         )}

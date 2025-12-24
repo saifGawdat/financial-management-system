@@ -24,13 +24,22 @@ const Income = () => {
     date: new Date().toISOString().split("T")[0],
     description: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchIncomes = useCallback(async () => {
     try {
       const res = await API.get("/income", {
-        params: { month, year },
+        params: {
+          month,
+          year,
+          _t: Date.now(), // Cache buster
+        },
       });
-      setIncomes(res.data);
+      // Sort by createdAt (newest first) on the frontend
+      const sortedIncomes = (res.data || []).sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      );
+      setIncomes(sortedIncomes);
     } catch (error) {
       console.error("Error fetching incomes:", error);
     }
@@ -46,6 +55,8 @@ const Income = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
     try {
       await API.post("/income", formData);
       setIsModalOpen(false);
@@ -56,9 +67,11 @@ const Income = () => {
         date: new Date().toISOString().split("T")[0],
         description: "",
       });
-      fetchIncomes();
+      await fetchIncomes();
     } catch (error) {
       console.error("Error adding income:", error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -77,7 +90,10 @@ const Income = () => {
     exportIncomeToExcel(incomes);
   };
 
-  const totalIncome = incomes.reduce((sum, income) => sum + income.amount, 0);
+  const totalIncome = incomes.reduce(
+    (sum, income) => sum + Number(income.amount || 0),
+    0
+  );
 
   return (
     <DashboardLayout>
@@ -147,7 +163,7 @@ const Income = () => {
               required
             />
             <Input
-              label="Amount ($)"
+              label="Amount (£)"
               type="number"
               name="amount"
               value={formData.amount}
@@ -180,12 +196,12 @@ const Income = () => {
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Add notes..."
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 rows="3"
               />
             </div>
-            <Button type="submit" className="w-full">
-              Add Income
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Adding..." : "Add Income"}
             </Button>
           </form>
         </Modal>

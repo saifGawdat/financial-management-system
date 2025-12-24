@@ -29,6 +29,7 @@ const Expense = () => {
     date: new Date().toISOString().split("T")[0],
     description: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchUserCategories = useCallback(async () => {
     try {
@@ -46,10 +47,20 @@ const Expense = () => {
   const fetchExpenses = useCallback(async () => {
     try {
       const res = await API.get("/expense", {
-        params: { month, year },
+        params: {
+          month,
+          year,
+          _t: Date.now(), // Cache buster
+        },
       });
       if (Array.isArray(res.data)) {
-        setExpenses(res.data);
+        // Sort by createdAt (newest first) on the frontend
+        const sortedExpenses = res.data.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setExpenses(sortedExpenses);
+      } else {
+        setExpenses([]);
       }
     } catch (error) {
       console.error("Error fetching expenses:", error);
@@ -66,7 +77,9 @@ const Expense = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     setError(""); // Clear previous errors
+    setIsSubmitting(true);
     try {
       await API.post("/expense", formData);
       setIsModalOpen(false);
@@ -77,7 +90,7 @@ const Expense = () => {
         date: new Date().toISOString().split("T")[0],
         description: "",
       });
-      fetchExpenses();
+      await fetchExpenses();
     } catch (error) {
       console.error("Error adding expense:", error);
       const msg =
@@ -85,6 +98,8 @@ const Expense = () => {
         error.response?.data?.message ||
         "Failed to add expense. Please check your connection.";
       setError(msg);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -104,7 +119,7 @@ const Expense = () => {
   };
 
   const totalExpense = expenses.reduce(
-    (sum, expense) => sum + expense.amount,
+    (sum, expense) => sum + Number(expense.amount || 0),
     0
   );
 
@@ -181,7 +196,7 @@ const Expense = () => {
               required
             />
             <Input
-              label="Amount ($)"
+              label="Amount (£)"
               type="number"
               name="amount"
               value={formData.amount}
@@ -198,7 +213,7 @@ const Expense = () => {
                 value={formData.category}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
               >
                 <option value="Other">Other</option>
                 {Array.isArray(userCategories) &&
@@ -228,12 +243,12 @@ const Expense = () => {
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Add notes..."
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                 rows="3"
               />
             </div>
-            <Button type="submit" className="w-full">
-              Add Expense
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Adding..." : "Add Expense"}
             </Button>
           </form>
         </Modal>
