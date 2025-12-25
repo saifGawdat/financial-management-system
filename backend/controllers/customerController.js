@@ -36,11 +36,15 @@ exports.getCustomers = async (req, res) => {
     }
 
     // Find all income records for these customers in the given month/year
-    const startDate = new Date(
-      Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0)
-    );
+    const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
     const endDate = new Date(
-      Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999)
+      parseInt(year),
+      parseInt(month),
+      0,
+      23,
+      59,
+      59,
+      999
     );
 
     const payments = await Income.find({
@@ -132,11 +136,15 @@ exports.unpayCustomer = async (req, res) => {
     const customerId = req.params.id;
 
     // Find the income record for this customer in this month
-    const startDate = new Date(
-      Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0)
-    );
+    const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
     const endDate = new Date(
-      Date.UTC(parseInt(year), parseInt(month), 0, 23, 59, 59, 999)
+      parseInt(year),
+      parseInt(month),
+      0,
+      23,
+      59,
+      59,
+      999
     );
 
     const income = await Income.findOne({
@@ -186,6 +194,44 @@ exports.deleteCustomer = async (req, res) => {
 
     await Customer.findByIdAndDelete(req.params.id);
     res.json({ message: "Customer removed successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+// Edit customer
+exports.editCustomer = async (req, res) => {
+  try {
+    const customer = await Customer.findById(req.params.id);
+
+    if (!customer) {
+      return res.status(404).json({ error: "Customer not found" });
+    }
+
+    if (customer.user.toString() !== req.userId) {
+      return res.status(401).json({ error: "Not authorized" });
+    }
+
+    // Extract and validate fields
+    const { name, brandName, phoneNumber, monthlyAmount } = req.body;
+
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (brandName !== undefined) updateData.brandName = brandName;
+    if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber;
+    if (monthlyAmount !== undefined) updateData.monthlyAmount = monthlyAmount;
+
+    // Update customer and return the updated document
+    const updatedCustomer = await Customer.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    res.json({
+      message: "Customer updated successfully",
+      customer: updatedCustomer,
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });

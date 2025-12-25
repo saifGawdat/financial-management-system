@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import Modal from "../../components/ui/Modal";
@@ -12,6 +11,7 @@ import {
   IoCheckmarkCircleOutline,
   IoCloseCircleOutline,
   IoDownloadOutline,
+  IoPencilOutline,
 } from "react-icons/io5";
 import * as XLSX from "xlsx";
 
@@ -19,6 +19,8 @@ const Customers = () => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState(null);
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
@@ -29,6 +31,7 @@ const Customers = () => {
     monthlyAmount: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [processingPayments, setProcessingPayments] = useState(new Set());
 
   useEffect(() => {
     fetchCustomers();
@@ -50,31 +53,51 @@ const Customers = () => {
   }, [selectedMonth, selectedYear]);
 
   const handlePay = async (id) => {
+    if (processingPayments.has(id)) return; // Prevent duplicate clicks
+
     if (
       window.confirm(
         "Confirm payment for this customer for the selected month?"
       )
     ) {
       try {
+        setProcessingPayments((prev) => new Set(prev).add(id));
         await customerAPI.pay(id, selectedMonth, selectedYear);
         fetchCustomers();
       } catch (error) {
         console.error("Error processing payment:", error);
+        alert("Failed to process payment. Please try again.");
+      } finally {
+        setProcessingPayments((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(id);
+          return newSet;
+        });
       }
     }
   };
 
   const handleUnpay = async (id) => {
+    if (processingPayments.has(id)) return; // Prevent duplicate clicks
+
     if (
       window.confirm(
         "Are you sure you want to mark this customer as UNPAID for this month? (This will remove the payment from income)"
       )
     ) {
       try {
+        setProcessingPayments((prev) => new Set(prev).add(id));
         await customerAPI.unpay(id, selectedMonth, selectedYear);
         fetchCustomers();
       } catch (error) {
         console.error("Error reversing payment:", error);
+        alert("Failed to reverse payment. Please try again.");
+      } finally {
+        setProcessingPayments((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(id);
+          return newSet;
+        });
       }
     }
   };
@@ -88,6 +111,17 @@ const Customers = () => {
         console.error("Error deleting customer:", error);
       }
     }
+  };
+
+  const handleEdit = (customer) => {
+    setEditingCustomer(customer);
+    setFormData({
+      name: customer.name,
+      brandName: customer.brandName || "",
+      phoneNumber: customer.phoneNumber,
+      monthlyAmount: customer.monthlyAmount,
+    });
+    setShowEditModal(true);
   };
 
   const handleSubmit = async (e) => {
@@ -106,6 +140,29 @@ const Customers = () => {
       fetchCustomers();
     } catch (error) {
       console.error("Error creating customer:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await customerAPI.update(editingCustomer._id, formData);
+      setShowEditModal(false);
+      setEditingCustomer(null);
+      setFormData({
+        name: "",
+        brandName: "",
+        phoneNumber: "",
+        monthlyAmount: "",
+      });
+      fetchCustomers();
+    } catch (error) {
+      console.error("Error updating customer:", error);
+      alert("Failed to update customer. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -289,21 +346,38 @@ const Customers = () => {
                       {!paid ? (
                         <button
                           onClick={() => handlePay(customer._id)}
-                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 transition-all font-semibold shadow-md shadow-green-100"
+                          disabled={processingPayments.has(customer._id)}
+                          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl flex items-center gap-2 transition-all font-semibold shadow-md shadow-green-100 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           <IoCashOutline size={20} />
-                          <span>Pay</span>
+                          <span>
+                            {processingPayments.has(customer._id)
+                              ? "Processing..."
+                              : "Pay"}
+                          </span>
                         </button>
                       ) : (
                         <button
                           onClick={() => handleUnpay(customer._id)}
-                          className="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl flex items-center gap-2 transition-all font-semibold"
+                          disabled={processingPayments.has(customer._id)}
+                          className="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-xl flex items-center gap-2 transition-all font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Undo payment"
                         >
                           <IoCloseCircleOutline size={20} />
-                          <span>Undo</span>
+                          <span>
+                            {processingPayments.has(customer._id)
+                              ? "Processing..."
+                              : "Undo"}
+                          </span>
                         </button>
                       )}
+                      <button
+                        onClick={() => handleEdit(customer)}
+                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                        title="Edit customer"
+                      >
+                        <IoPencilOutline size={20} />
+                      </button>
                       <button
                         onClick={() => handleDelete(customer._id)}
                         className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
@@ -377,12 +451,82 @@ const Customers = () => {
             >
               Cancel
             </Button>
+            <Button type="submit" disabled={isSubmitting} className="flex-1">
+              {isSubmitting ? "Creating..." : "Create"}
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Edit Modal */}
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingCustomer(null);
+          setFormData({
+            name: "",
+            brandName: "",
+            phoneNumber: "",
+            monthlyAmount: "",
+          });
+        }}
+        title="Edit Customer"
+      >
+        <form onSubmit={handleUpdate} className="space-y-4">
+          <Input
+            label="Customer Name"
+            required
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            placeholder="e.g. John Doe"
+          />
+          <Input
+            label="Brand/Company Name"
+            value={formData.brandName}
+            onChange={(e) =>
+              setFormData({ ...formData, brandName: e.target.value })
+            }
+            placeholder="e.g. Acme Corp"
+          />
+          <Input
+            label="Phone Number"
+            required
+            value={formData.phoneNumber}
+            onChange={(e) =>
+              setFormData({ ...formData, phoneNumber: e.target.value })
+            }
+            placeholder="e.g. +1234567890"
+          />
+          <Input
+            label="Monthly Amount"
+            required
+            type="number"
+            value={formData.monthlyAmount}
+            onChange={(e) =>
+              setFormData({ ...formData, monthlyAmount: e.target.value })
+            }
+            placeholder="e.g. 500"
+          />
+          <div className="flex gap-4 pt-4">
             <Button
-              type="submit"
-              disabled={isSubmitting}
+              variant="secondary"
+              onClick={() => {
+                setShowEditModal(false);
+                setEditingCustomer(null);
+                setFormData({
+                  name: "",
+                  brandName: "",
+                  phoneNumber: "",
+                  monthlyAmount: "",
+                });
+              }}
               className="flex-1"
             >
-              {isSubmitting ? "Creating..." : "Create"}
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting} className="flex-1">
+              {isSubmitting ? "Updating..." : "Update"}
             </Button>
           </div>
         </form>
