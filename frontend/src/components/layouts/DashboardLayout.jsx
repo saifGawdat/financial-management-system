@@ -76,7 +76,7 @@ const DashboardLayout = ({ children }) => {
   ];
 
   return (
-    <div className="h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Mobile header */}
       <div className="lg:hidden bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-30">
         <button
@@ -99,7 +99,7 @@ const DashboardLayout = ({ children }) => {
         {/* Sidebar */}
         <aside
           className={`
-          fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out h-screen flex flex-col
+          fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out h-screen lg:h-auto lg:min-h-screen flex flex-col
           ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }
@@ -123,8 +123,8 @@ const DashboardLayout = ({ children }) => {
             </button>
           </div>
 
-          {/* Navigation - takes up available space and scrolls if needed */}
-          <nav className="flex-1 overflow-y-auto p-4">
+          {/* Navigation - takes up available space */}
+          <nav className="flex-1 p-4 overflow-y-auto lg:overflow-visible">
             <ul className="space-y-2">
               {navItems.map((item) => (
                 <li key={item.path}>
