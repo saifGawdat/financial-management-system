@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import Modal from "../ui/Modal";
 import {
   IoHomeOutline,
   IoWalletOutline,
@@ -13,43 +12,18 @@ import {
   IoPricetagsOutline,
   IoCashOutline,
   IoStatsChartOutline,
-  IoTrashOutline,
-  IoWarningOutline,
+  IoSettingsOutline,
 } from "react-icons/io5";
 
 const DashboardLayout = ({ children }) => {
-  const { user, logout, deleteAccount } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState("");
 
   const handleLogout = () => {
     logout();
     navigate("/login");
-  };
-
-  const handleDeleteAccount = async () => {
-    setDeleteError("");
-    setIsDeleting(true);
-
-    try {
-      const result = await deleteAccount();
-
-      if (result.success) {
-        // Account deleted successfully, user is logged out, redirect to login
-        navigate("/login");
-      } else {
-        // Show error message
-        setDeleteError(result.error);
-        setIsDeleting(false);
-      }
-    } catch {
-      setDeleteError("An unexpected error occurred. Please try again.");
-      setIsDeleting(false);
-    }
   };
 
   const navItems = [
@@ -73,6 +47,7 @@ const DashboardLayout = ({ children }) => {
       label: "Profit Summary",
     },
     { path: "/customers", icon: IoPeopleOutline, label: "Customers" },
+    { path: "/settings", icon: IoSettingsOutline, label: "Settings" },
   ];
 
   return (
@@ -81,7 +56,8 @@ const DashboardLayout = ({ children }) => {
       <div className="lg:hidden bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-30">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-700"
+          aria-label={sidebarOpen ? "Close menu" : "Open menu"}
         >
           {sidebarOpen ? (
             <IoCloseOutline size={28} />
@@ -118,6 +94,7 @@ const DashboardLayout = ({ children }) => {
             <button
               onClick={() => setSidebarOpen(false)}
               className="lg:hidden p-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+              aria-label="Close menu"
             >
               <IoCloseOutline size={28} />
             </button>
@@ -145,22 +122,14 @@ const DashboardLayout = ({ children }) => {
             </ul>
           </nav>
 
-          {/* Logout and Delete Account buttons - stay at bottom */}
-          <div className="p-4 border-t border-gray-200 space-y-2">
+          {/* Logout button - stays at bottom */}
+          <div className="p-4 border-t border-gray-200">
             <button
               onClick={handleLogout}
               className="flex items-center gap-3 px-4 py-3 w-full text-gray-700 hover:bg-gray-100 rounded-lg transition-all"
             >
               <IoLogOutOutline size={22} />
               <span className="font-medium">Logout</span>
-            </button>
-
-            <button
-              onClick={() => setShowDeleteModal(true)}
-              className="flex items-center gap-3 px-4 py-3 w-full text-red-600 hover:bg-red-50 rounded-lg transition-all"
-            >
-              <IoTrashOutline size={22} />
-              <span className="font-medium">Delete Account</span>
             </button>
           </div>
         </aside>
@@ -177,65 +146,8 @@ const DashboardLayout = ({ children }) => {
         <main className="flex-1 p-4 lg:p-8 w-full max-w-full overflow-x-hidden">
           {children}
         </main>
+        
       </div>
-
-      {/* Delete Account Confirmation Modal */}
-      <Modal
-        isOpen={showDeleteModal}
-        onClose={() => !isDeleting && setShowDeleteModal(false)}
-        title="Delete Account"
-      >
-        <div className="space-y-4">
-          <div className="flex items-start gap-3 p-4 bg-red-50 rounded-lg">
-            <IoWarningOutline
-              className="text-red-600 flex-shrink-0 mt-0.5"
-              size={24}
-            />
-            <div>
-              <h3 className="font-semibold text-red-900 mb-1">
-                Warning: This action cannot be undone!
-              </h3>
-              <p className="text-sm text-red-700">
-                Deleting your account will permanently remove all your data,
-                including transactions, expenses, and income records.
-              </p>
-            </div>
-          </div>
-
-          {deleteError && (
-            <div className="p-4 bg-red-100 border border-red-300 rounded-lg">
-              <p className="text-sm text-red-800">{deleteError}</p>
-            </div>
-          )}
-
-          <div className="flex gap-3 pt-2">
-            <button
-              onClick={() => setShowDeleteModal(false)}
-              disabled={isDeleting}
-              className="flex-1 px-4 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleDeleteAccount}
-              disabled={isDeleting}
-              className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {isDeleting ? (
-                <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                <>
-                  <IoTrashOutline size={20} />
-                  Delete Account
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 };

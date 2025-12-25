@@ -16,6 +16,7 @@ import ExpenseCategories from "./pages/Dashboard/ExpenseCategories";
 import MonthlySalaries from "./pages/Dashboard/MonthlySalaries";
 import ProfitSummary from "./pages/Dashboard/ProfitSummary";
 import Customers from "./pages/Dashboard/Customers";
+import Settings from "./pages/Dashboard/Settings";
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -23,7 +24,7 @@ const ProtectedRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-xl text-gray-500">Loading...</div>
       </div>
     );
@@ -103,6 +104,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />{" "}
       </Routes>
     </Router>
   );
@@ -115,7 +124,7 @@ const Root = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-xl text-gray-500">Loading...</div>
       </div>
     );

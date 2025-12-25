@@ -100,7 +100,6 @@ const Home = () => {
           icon={IoWalletOutline}
           iconColor="text-purple-600"
           bgGradient="from-purple-500 to-purple-700"
-      
         />
         <SummaryCard
           title="Total Income"

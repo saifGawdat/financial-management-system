@@ -12,6 +12,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors p-1"
+            aria-label="Close modal"
           >
             <IoClose size={28} />
           </button>
