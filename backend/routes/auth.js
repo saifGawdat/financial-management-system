@@ -30,6 +30,10 @@ router.post(
   ],
   authController.login
 );
+// @route   DELETE /api/auth/delete-account
+// @desc    Delete user account
+// @access  Private
+router.delete("/delete-account", auth, authController.deleteAccount);
 
 // @route   GET /api/auth/me
 // @desc    Get current user

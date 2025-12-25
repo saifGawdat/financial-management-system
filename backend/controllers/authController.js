@@ -102,3 +102,36 @@ exports.getMe = async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 };
+
+// Delete user account
+exports.deleteAccount = async (req, res) => {
+  try {
+    // Find user first to verify existence
+    const user = await User.findById(req.userId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    // Log account deletion for audit purposes
+    console.log(
+      `Account deletion requested for user: ${user.email} (ID: ${user._id})`
+    );
+
+    // Delete the user account
+    await User.findByIdAndDelete(req.userId);
+
+    // Log successful deletion
+    console.log(`Account successfully deleted for user: ${user.email}`);
+
+    res.json({
+      message: "Account successfully deleted",
+      success: true,
+    });
+  } catch (error) {
+    console.error("Error deleting account:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to delete account. Please try again." });
+  }
+};

@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
           setLoading(false);
         });
     } else {
-       setLoading(false);
+      setLoading(false);
     }
   }, []);
 
@@ -51,12 +51,26 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     setUser(null);
   };
+  const deleteAccount = async () => {
+    try {
+      const response = await API.delete("/auth/delete-account");
+      // Only logout if deletion was successful
+      logout();
+      return { success: true, message: response.data.message };
+    } catch (error) {
+      console.error("Error deleting account:", error);
+      const errorMessage =
+        error.response?.data?.error || "Failed to delete account";
+      return { success: false, error: errorMessage };
+    }
+  };
 
   const value = {
     user,
     login,
     register,
     logout,
+    deleteAccount,
     isAuthenticated: !!user,
     loading,
   };
