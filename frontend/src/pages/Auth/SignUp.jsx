@@ -4,6 +4,7 @@ import AuthLayout from "../../components/layouts/AuthLayout";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import { useAuth } from "../../context/AuthContext";
+import { GoogleLogin } from "@react-oauth/google";
 
 const SignUp = () => {
   const [formData, setFormData] = useState({
@@ -12,8 +13,17 @@ const SignUp = () => {
     password: "",
   });
   const [error, setError] = useState("");
-  const { register } = useAuth();
+  const { register, googleLogin } = useAuth();
   const navigate = useNavigate();
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      await googleLogin(credentialResponse.credential);
+      navigate("/dashboard");
+    } catch (err) {
+      setError("Google Sign Up failed");
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -78,6 +88,23 @@ const SignUp = () => {
             Sign Up
           </Button>
         </form>
+
+        <div className="my-6 flex items-center">
+          <div className="flex-grow border-t border-gray-300"></div>
+          <span className="mx-4 text-gray-500 text-sm">OR</span>
+          <div className="flex-grow border-t border-gray-300"></div>
+        </div>
+
+        <div className="flex justify-center">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError("Google Sign Up failed")}
+            useOneTap
+            width="100%"
+            text="continue_with_"
+            logo_alignment="left"
+          />
+        </div>
 
         <p className="text-center text-gray-600 mt-6">
           Already have an account?{" "}
