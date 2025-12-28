@@ -30,6 +30,11 @@ router.post(
   ],
   authController.login
 );
+
+// @route   POST /api/auth/google
+// @desc    Google Login
+// @access  Public
+router.post("/google", authController.googleLogin);
 // @route   DELETE /api/auth/delete-account
 // @desc    Delete user account
 // @access  Private
