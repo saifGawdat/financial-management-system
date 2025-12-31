@@ -19,6 +19,10 @@ exports.addCustomer = async (req, res) => {
     res.status(201).json(customer);
   } catch (error) {
     console.error(error);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return res.status(400).json({ error: messages.join(", ") });
+    }
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -64,6 +68,10 @@ exports.getCustomers = async (req, res) => {
     res.json(customerWithStatus);
   } catch (error) {
     console.error(error);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return res.status(400).json({ error: messages.join(", ") });
+    }
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -121,6 +129,10 @@ exports.payCustomer = async (req, res) => {
     res.json({ message: "Payment processed successfully", customer, income });
   } catch (error) {
     console.error(error);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return res.status(400).json({ error: messages.join(", ") });
+    }
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -167,6 +179,10 @@ exports.unpayCustomer = async (req, res) => {
     res.json({ message: "Payment reversed successfully" });
   } catch (error) {
     console.error(error);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return res.status(400).json({ error: messages.join(", ") });
+    }
     res.status(500).json({ error: "Server error" });
   }
 };
@@ -188,6 +204,40 @@ exports.deleteCustomer = async (req, res) => {
     res.json({ message: "Customer removed successfully" });
   } catch (error) {
     console.error(error);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return res.status(400).json({ error: messages.join(", ") });
+    }
+    res.status(500).json({ error: "Server error" });
+  }
+};
+// Update customer
+exports.updateCustomer = async (req, res) => {
+  try {
+    const { name, brandName, phoneNumber, monthlyAmount } = req.body;
+    const customer = await Customer.findById(req.params.id);
+
+    if (!customer) {
+      return res.status(404).json({ error: "Customer not found" });
+    }
+
+    if (customer.user.toString() !== req.userId) {
+      return res.status(401).json({ error: "Not authorized" });
+    }
+
+    if (name !== undefined) customer.name = name;
+    if (brandName !== undefined) customer.brandName = brandName;
+    if (phoneNumber !== undefined) customer.phoneNumber = phoneNumber;
+    if (monthlyAmount !== undefined) customer.monthlyAmount = monthlyAmount;
+
+    await customer.save();
+    res.json(customer);
+  } catch (error) {
+    console.error(error);
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return res.status(400).json({ error: messages.join(", ") });
+    }
     res.status(500).json({ error: "Server error" });
   }
 };

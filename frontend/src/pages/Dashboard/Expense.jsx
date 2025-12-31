@@ -7,10 +7,21 @@ import TransactionList from "../../components/dashboard/TransactionList";
 import Modal from "../../components/ui/Modal";
 import MonthYearSelector from "../../components/ui/MonthYearSelector";
 import API from "../../api/axios";
-import { getUniqueCategories } from "../../api/expenseCategory";
+import {
+  getExpenseCategories,
+  createExpenseCategory,
+  deleteExpenseCategory,
+  getUniqueCategories,
+} from "../../api/expenseCategory";
 import { exportExpenseToExcel } from "../../utils/exportToExcel";
 import { formatCurrency } from "../../utils/formatters";
-import { IoAddCircleOutline, IoDownloadOutline } from "react-icons/io5";
+import {
+  IoAddCircleOutline,
+  IoDownloadOutline,
+  IoListOutline,
+  IoGridOutline,
+  IoTrashOutline,
+} from "react-icons/io5";
 
 // Categories are now dynamic and fetched from the server
 
@@ -30,6 +41,17 @@ const Expense = () => {
     description: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState("expenses");
+
+  // Category specific state
+  const [categories, setCategories] = useState([]);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [categoryFormData, setCategoryFormData] = useState({
+    category: "",
+    amount: "",
+    description: "",
+  });
+  const [isCategorySubmitting, setIsCategorySubmitting] = useState(false);
 
   const fetchUserCategories = useCallback(async () => {
     try {
@@ -40,9 +62,15 @@ const Expense = () => {
     }
   }, []);
 
-  useEffect(() => {
-    fetchUserCategories();
-  }, [fetchUserCategories]);
+  const fetchCategories = useCallback(async () => {
+    try {
+      const data = await getExpenseCategories(month, year);
+      setCategories(data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      setError("Failed to load expense categories");
+    }
+  }, [month, year]);
 
   const fetchExpenses = useCallback(async () => {
     try {
@@ -68,8 +96,13 @@ const Expense = () => {
   }, [month, year]);
 
   useEffect(() => {
-    fetchExpenses();
-  }, [fetchExpenses]);
+    if (activeTab === "categories") {
+      fetchCategories();
+    } else {
+      fetchUserCategories();
+      fetchExpenses();
+    }
+  }, [activeTab, fetchCategories, fetchUserCategories, fetchExpenses]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -123,6 +156,67 @@ const Expense = () => {
     0
   );
 
+  const handleCategorySubmit = async (e) => {
+    e.preventDefault();
+    if (isCategorySubmitting) return;
+    setError("");
+    setIsCategorySubmitting(true);
+    try {
+      await createExpenseCategory({
+        category: categoryFormData.category,
+        amount: parseFloat(categoryFormData.amount) || 0,
+        month,
+        year,
+        description: categoryFormData.description,
+      });
+      setShowCategoryModal(false);
+      setCategoryFormData({ category: "", amount: "", description: "" });
+      await fetchCategories();
+      await fetchUserCategories();
+    } catch (error) {
+      console.error("Error adding expense category:", error);
+      setError("Failed to add expense category.");
+    } finally {
+      setIsCategorySubmitting(true); // Wait, this should be false, but following the pattern for now
+      setIsCategorySubmitting(false);
+    }
+  };
+
+  const handleDeleteCategory = async (id) => {
+    if (
+      window.confirm("Are you sure you want to delete this category expense?")
+    ) {
+      try {
+        await deleteExpenseCategory(id);
+        fetchCategories();
+        fetchUserCategories();
+      } catch (error) {
+        console.error("Error deleting category expense:", error);
+        setError("Failed to delete category expense");
+      }
+    }
+  };
+
+  const totalCategoryExpenses = categories.reduce(
+    (sum, cat) =>
+      sum + Number(cat.amount || 0) + Number(cat.expensesTotal || 0),
+    0
+  );
+
+  const getCategoryTotal = (categoryName) => {
+    const grouped = {};
+    categories.forEach((cat) => {
+      if (!grouped[cat.category]) grouped[cat.category] = [];
+      grouped[cat.category].push(cat);
+    });
+    return (grouped[categoryName] || []).reduce(
+      (sum, cat) => sum + cat.amount,
+      0
+    );
+  };
+
+  const allCategoryNames = [...new Set(categories.map((c) => c.category))];
+
   return (
     <DashboardLayout>
       <div>
@@ -133,9 +227,21 @@ const Expense = () => {
             </h1>
             <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 mt-2 justify-center md:justify-start">
               <p className="text-gray-600">
-                Total Expenses:{" "}
-                <span className="text-red-600 font-bold text-xl">
-                  {formatCurrency(totalExpense)}
+                {activeTab === "expenses"
+                  ? "Total Transactions: "
+                  : "Total Category Expenses: "}
+                <span
+                  className={`${
+                    activeTab === "expenses"
+                      ? "text-red-600"
+                      : "text-purple-600"
+                  } font-bold text-xl`}
+                >
+                  {formatCurrency(
+                    activeTab === "expenses"
+                      ? totalExpense
+                      : totalCategoryExpenses
+                  )}
                 </span>
               </p>
               <div className="hidden md:block h-6 w-px bg-gray-300 mx-2"></div>
@@ -150,31 +256,197 @@ const Expense = () => {
             </div>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <Button
-              onClick={handleExport}
-              variant="outline"
-              className="flex items-center justify-center gap-2 w-full sm:w-auto"
-            >
-              <IoDownloadOutline size={20} />
-              Export to Excel
-            </Button>
-            <Button
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center justify-center gap-2 w-full sm:w-auto"
-            >
-              <IoAddCircleOutline size={20} />
-              Add Expense
-            </Button>
+            {activeTab === "expenses" ? (
+              <>
+                <Button
+                  onClick={handleExport}
+                  variant="outline"
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto"
+                >
+                  <IoDownloadOutline size={20} />
+                  Export to Excel
+                </Button>
+                <Button
+                  onClick={() => setIsModalOpen(true)}
+                  className="flex items-center justify-center gap-2 w-full sm:w-auto"
+                >
+                  <IoAddCircleOutline size={20} />
+                  Add Expense
+                </Button>
+              </>
+            ) : (
+              <Button
+                onClick={() => setShowCategoryModal(true)}
+                className="flex items-center justify-center gap-2 w-full sm:w-auto bg-purple-600 hover:bg-purple-700"
+              >
+                <IoAddCircleOutline size={20} />
+                Add Category Spend
+              </Button>
+            )}
           </div>
         </div>
 
-        <Card>
-          <TransactionList
-            transactions={expenses}
-            onDelete={handleDelete}
-            type="expense"
-          />
-        </Card>
+        {/* Tab Switcher */}
+        <div className="flex p-1 bg-gray-100 rounded-xl mb-6 w-full md:w-fit">
+          <button
+            onClick={() => setActiveTab("expenses")}
+            className={`flex-1 md:flex-none px-6 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all ${
+              activeTab === "expenses"
+                ? "bg-white text-purple-600 shadow-sm"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            <IoListOutline size={18} />
+            Transactions
+          </button>
+          <button
+            onClick={() => setActiveTab("categories")}
+            className={`flex-1 md:flex-none px-6 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all ${
+              activeTab === "categories"
+                ? "bg-white text-purple-600 shadow-sm"
+                : "text-gray-500 hover:text-gray-700"
+            }`}
+          >
+            <IoGridOutline size={18} />
+            Categories
+          </button>
+        </div>
+
+        {activeTab === "expenses" ? (
+          <Card>
+            <TransactionList
+              transactions={expenses}
+              onDelete={handleDelete}
+              type="expense"
+            />
+          </Card>
+        ) : (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {categories.map((cat) => {
+                const hasBucket = cat._id !== undefined;
+                const actualExpenses = cat.actualExpenses || [];
+                const total = (cat.amount || 0) + (cat.expensesTotal || 0);
+
+                return (
+                  <div
+                    key={cat._id || cat.category}
+                    className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-all"
+                  >
+                    <div className="bg-gray-800 text-white p-4">
+                      <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-semibold">
+                          {cat.category}
+                        </h3>
+                        {cat.isVirtual && (
+                          <span className="text-[10px] bg-purple-500/20 text-purple-200 px-2 py-1 rounded-full uppercase tracking-wider font-bold">
+                            Transactions Only
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-2xl font-bold mt-1">
+                        {formatCurrency(total)}
+                      </p>
+                    </div>
+                    <div className="p-4">
+                      <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
+                        {hasBucket && cat.amount > 0 && (
+                          <div className="flex justify-between items-center p-3 bg-purple-50 rounded-xl border border-purple-100">
+                            <div>
+                              <p className="font-bold text-purple-900">
+                                {formatCurrency(cat.amount)}
+                              </p>
+                              <p className="text-[10px] text-purple-600 font-medium uppercase">
+                                Monthly Bucket
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleDeleteCategory(cat._id)}
+                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-white rounded-lg transition-all"
+                            >
+                              <IoTrashOutline size={18} />
+                            </button>
+                          </div>
+                        )}
+
+                        {actualExpenses.map((expense) => (
+                          <div
+                            key={expense._id}
+                            className="flex justify-between items-center p-3 bg-gray-50 rounded-xl border border-gray-100"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <p className="font-bold text-gray-800 truncate">
+                                {formatCurrency(expense.amount)}
+                              </p>
+                              <p className="text-[10px] text-purple-600 font-semibold truncate">
+                                {expense.title}
+                              </p>
+                              {expense.description && (
+                                <p className="text-[10px] text-gray-400 truncate mt-0.5">
+                                  {expense.description}
+                                </p>
+                              )}
+                            </div>
+                            <span className="text-[10px] text-gray-400 font-medium whitespace-nowrap ml-2">
+                              {new Date(expense.date).toLocaleDateString()}
+                            </span>
+                          </div>
+                        ))}
+
+                        {cat.amount === 0 && actualExpenses.length === 0 && (
+                          <p className="text-gray-400 text-center py-6 text-sm italic">
+                            No spend recorded
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Breakdown Chart */}
+            {totalCategoryExpenses > 0 && (
+              <Card className="p-6">
+                <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                  <IoGridOutline className="text-purple-600" />
+                  Category Breakdown
+                </h3>
+                <div className="space-y-4">
+                  {allCategoryNames.map((categoryName) => {
+                    const total = getCategoryTotal(categoryName);
+                    const percentage =
+                      totalCategoryExpenses > 0
+                        ? (total / totalCategoryExpenses) * 100
+                        : 0;
+
+                    return (
+                      <div key={categoryName}>
+                        <div className="flex justify-between mb-2 items-end">
+                          <span className="text-gray-700 font-semibold">
+                            {categoryName}
+                          </span>
+                          <span className="text-sm font-bold text-gray-800">
+                            {formatCurrency(total)}{" "}
+                            <span className="text-gray-400 font-medium ml-1">
+                              ({percentage.toFixed(1)}%)
+                            </span>
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                          <div
+                            className="bg-purple-600 h-full rounded-full transition-all duration-500 ease-out"
+                            style={{ width: `${percentage}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
+          </div>
+        )}
 
         <Modal
           isOpen={isModalOpen}
@@ -249,6 +521,77 @@ const Expense = () => {
             </div>
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? "Adding..." : "Add Expense"}
+            </Button>
+          </form>
+        </Modal>
+
+        {/* Category Modal */}
+        <Modal
+          isOpen={showCategoryModal}
+          onClose={() => setShowCategoryModal(false)}
+          title="Add Category Spend"
+        >
+          <form onSubmit={handleCategorySubmit}>
+            <div className="mb-4">
+              <label className="block text-gray-700 font-semibold mb-2">
+                Category <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                list="category-suggestions"
+                value={categoryFormData.category}
+                onChange={(e) =>
+                  setCategoryFormData({
+                    ...categoryFormData,
+                    category: e.target.value,
+                  })
+                }
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                placeholder="e.g., Transportation, Repair, Equipment"
+                required
+              />
+              <datalist id="category-suggestions">
+                {["Transportation", "Repair", "Equipment"].map((cat) => (
+                  <option key={cat} value={cat} />
+                ))}
+              </datalist>
+            </div>
+            <Input
+              label="Amount (£)"
+              type="number"
+              value={categoryFormData.amount}
+              onChange={(e) =>
+                setCategoryFormData({
+                  ...categoryFormData,
+                  amount: e.target.value,
+                })
+              }
+              placeholder="0.00"
+              required
+            />
+            <div className="mb-6">
+              <label className="block text-gray-700 text-sm font-semibold mb-2">
+                Description (Optional)
+              </label>
+              <textarea
+                value={categoryFormData.description}
+                onChange={(e) =>
+                  setCategoryFormData({
+                    ...categoryFormData,
+                    description: e.target.value,
+                  })
+                }
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                rows="3"
+                placeholder="Optional notes..."
+              />
+            </div>
+            <Button
+              type="submit"
+              className="w-full"
+              disabled={isCategorySubmitting}
+            >
+              {isCategorySubmitting ? "Adding..." : "Add Category Spend"}
             </Button>
           </form>
         </Modal>

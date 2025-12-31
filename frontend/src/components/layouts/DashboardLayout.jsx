@@ -32,11 +32,6 @@ const DashboardLayout = ({ children }) => {
     { path: "/expense", icon: IoCartOutline, label: "Expenses" },
     { path: "/employees", icon: IoPeopleOutline, label: "Employees" },
     {
-      path: "/expense-categories",
-      icon: IoPricetagsOutline,
-      label: "Expense Categories",
-    },
-    {
       path: "/monthly-salaries",
       icon: IoCashOutline,
       label: "Monthly Salaries",
@@ -146,7 +141,6 @@ const DashboardLayout = ({ children }) => {
         <main className="flex-1 p-4 lg:p-8 w-full max-w-full overflow-x-hidden">
           {children}
         </main>
-        
       </div>
     </div>
   );

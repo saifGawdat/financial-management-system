@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import Modal from "../../components/ui/Modal";
@@ -12,6 +11,7 @@ import {
   IoCheckmarkCircleOutline,
   IoCloseCircleOutline,
   IoDownloadOutline,
+  IoPencilOutline,
 } from "react-icons/io5";
 import * as XLSX from "xlsx";
 
@@ -29,10 +29,8 @@ const Customers = () => {
     monthlyAmount: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    fetchCustomers();
-  }, [selectedMonth, selectedYear]);
+  const [editingCustomer, setEditingCustomer] = useState(null);
+  const [error, setError] = useState("");
 
   const fetchCustomers = React.useCallback(async () => {
     try {
@@ -40,6 +38,7 @@ const Customers = () => {
       const data = await customerAPI.getAll({
         month: selectedMonth,
         year: selectedYear,
+        _t: Date.now(), // Cache buster
       });
       setCustomers(data);
     } catch (error) {
@@ -48,6 +47,10 @@ const Customers = () => {
       setLoading(false);
     }
   }, [selectedMonth, selectedYear]);
+
+  useEffect(() => {
+    fetchCustomers();
+  }, [fetchCustomers]);
 
   const handlePay = async (id) => {
     if (
@@ -90,13 +93,38 @@ const Customers = () => {
     }
   };
 
+  const handleEdit = (customer) => {
+    setEditingCustomer(customer);
+    setFormData({
+      name: customer.name,
+      brandName: customer.brandName || "",
+      phoneNumber: customer.phoneNumber,
+      monthlyAmount: customer.monthlyAmount,
+    });
+    setShowAddModal(true);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (isSubmitting) return;
     setIsSubmitting(true);
+    const submissionData = {
+      ...formData,
+      name: formData.name.trim(),
+      brandName: formData.brandName?.trim(),
+      phoneNumber: formData.phoneNumber.trim(),
+      monthlyAmount: parseFloat(formData.monthlyAmount),
+    };
+
     try {
-      await customerAPI.create(formData);
+      if (editingCustomer) {
+        await customerAPI.update(editingCustomer._id, submissionData);
+      } else {
+        await customerAPI.create(submissionData);
+      }
       setShowAddModal(false);
+      setEditingCustomer(null);
+      setError("");
       setFormData({
         name: "",
         brandName: "",
@@ -105,7 +133,10 @@ const Customers = () => {
       });
       fetchCustomers();
     } catch (error) {
-      console.error("Error creating customer:", error);
+      console.error("Error saving customer:", error);
+      setError(
+        error.response?.data?.error || error.message || "Error saving customer"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -196,7 +227,16 @@ const Customers = () => {
               <span>Export</span>
             </button>
             <button
-              onClick={() => setShowAddModal(true)}
+              onClick={() => {
+                setEditingCustomer(null);
+                setFormData({
+                  name: "",
+                  brandName: "",
+                  phoneNumber: "",
+                  monthlyAmount: "",
+                });
+                setShowAddModal(true);
+              }}
               className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-purple-200 w-full sm:w-auto"
             >
               <IoAddOutline size={20} />
@@ -305,6 +345,13 @@ const Customers = () => {
                         </button>
                       )}
                       <button
+                        onClick={() => handleEdit(customer)}
+                        className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all"
+                        title="Edit customer"
+                      >
+                        <IoPencilOutline size={20} />
+                      </button>
+                      <button
                         onClick={() => handleDelete(customer._id)}
                         className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
                         title="Remove customer"
@@ -331,10 +378,25 @@ const Customers = () => {
       {/* Add Modal */}
       <Modal
         isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        title="Add New Customer"
+        onClose={() => {
+          setShowAddModal(false);
+          setEditingCustomer(null);
+          setError("");
+          setFormData({
+            name: "",
+            brandName: "",
+            phoneNumber: "",
+            monthlyAmount: "",
+          });
+        }}
+        title={editingCustomer ? "Edit Customer" : "Add New Customer"}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm font-medium">
+              {error}
+            </div>
+          )}
           <Input
             label="Customer Name"
             required
@@ -377,12 +439,14 @@ const Customers = () => {
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex-1"
-            >
-              {isSubmitting ? "Creating..." : "Create"}
+            <Button type="submit" disabled={isSubmitting} className="flex-1">
+              {isSubmitting
+                ? editingCustomer
+                  ? "Saving..."
+                  : "Creating..."
+                : editingCustomer
+                ? "Save Changes"
+                : "Create"}
             </Button>
           </div>
         </form>

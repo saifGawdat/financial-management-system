@@ -25,6 +25,11 @@ export const customerAPI = {
     const response = await API.delete(`/customer/${id}`);
     return response.data;
   },
+
+  update: async (id, customerData) => {
+    const response = await API.put(`/customer/${id}`, customerData);
+    return response.data;
+  },
 };
 
 export default customerAPI;

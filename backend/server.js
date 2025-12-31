@@ -17,6 +17,12 @@ app.use(
 );
 app.use(express.json());
 
+// Request logger
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
+});
+
 // Routes
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/income", require("./routes/income"));
@@ -30,6 +36,16 @@ app.use("/api/customer", require("./routes/customer"));
 // Health check route
 app.get("/", (req, res) => {
   res.json({ message: "Expense Tracker API is running" });
+});
+
+// 404 Handler
+app.use((req, res) => {
+  console.log(`404 Not Found: ${req.method} ${req.url}`);
+  res.status(404).json({
+    error: "API Route not found",
+    method: req.method,
+    url: req.url,
+  });
 });
 
 const PORT = process.env.PORT || 5000;

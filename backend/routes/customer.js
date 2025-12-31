@@ -7,6 +7,7 @@ router.use(auth);
 
 router.post("/", customerController.addCustomer);
 router.get("/", customerController.getCustomers);
+router.put("/:id", customerController.updateCustomer);
 router.post("/pay/:id", customerController.payCustomer);
 router.post("/unpay/:id", customerController.unpayCustomer);
 router.delete("/:id", customerController.deleteCustomer);
