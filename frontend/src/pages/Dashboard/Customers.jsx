@@ -27,6 +27,7 @@ const Customers = () => {
     brandName: "",
     phoneNumber: "",
     monthlyAmount: "",
+    paymentDeadline: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
@@ -100,6 +101,9 @@ const Customers = () => {
       brandName: customer.brandName || "",
       phoneNumber: customer.phoneNumber,
       monthlyAmount: customer.monthlyAmount,
+      paymentDeadline: customer.paymentDeadline
+        ? new Date(customer.paymentDeadline).toISOString().split("T")[0]
+        : "",
     });
     setShowAddModal(true);
   };
@@ -130,6 +134,7 @@ const Customers = () => {
         brandName: "",
         phoneNumber: "",
         monthlyAmount: "",
+        paymentDeadline: "",
       });
       fetchCustomers();
     } catch (error) {
@@ -323,6 +328,26 @@ const Customers = () => {
                               : "Never"}
                           </p>
                         </div>
+                        <div className="col-span-1">
+                          <p className="text-gray-400 mb-1 font-medium">
+                            Deadline
+                          </p>
+                          <p
+                            className={`font-semibold ${
+                              !paid &&
+                              customer.paymentDeadline &&
+                              new Date(customer.paymentDeadline) < new Date()
+                                ? "text-red-600"
+                                : "text-gray-700"
+                            }`}
+                          >
+                            {customer.paymentDeadline
+                              ? new Date(
+                                  customer.paymentDeadline
+                                ).toLocaleDateString()
+                              : "No Deadline"}
+                          </p>
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -387,6 +412,7 @@ const Customers = () => {
             brandName: "",
             phoneNumber: "",
             monthlyAmount: "",
+            paymentDeadline: "",
           });
         }}
         title={editingCustomer ? "Edit Customer" : "Add New Customer"}
@@ -430,6 +456,14 @@ const Customers = () => {
               setFormData({ ...formData, monthlyAmount: e.target.value })
             }
             placeholder="e.g. 500"
+          />
+          <Input
+            label="Payment Deadline"
+            type="date"
+            value={formData.paymentDeadline}
+            onChange={(e) =>
+              setFormData({ ...formData, paymentDeadline: e.target.value })
+            }
           />
           <div className="flex gap-4 pt-4">
             <Button
