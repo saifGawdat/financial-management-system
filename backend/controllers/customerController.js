@@ -5,7 +5,8 @@ const { calculateMonthlySummary } = require("./monthlySummaryController");
 // Add customer
 exports.addCustomer = async (req, res) => {
   try {
-    const { name, brandName, phoneNumber, monthlyAmount } = req.body;
+    const { name, brandName, phoneNumber, monthlyAmount, paymentDeadline } =
+      req.body;
 
     const customer = new Customer({
       user: req.userId,
@@ -13,6 +14,7 @@ exports.addCustomer = async (req, res) => {
       brandName,
       phoneNumber,
       monthlyAmount,
+      paymentDeadline,
     });
 
     await customer.save();
@@ -214,7 +216,8 @@ exports.deleteCustomer = async (req, res) => {
 // Update customer
 exports.updateCustomer = async (req, res) => {
   try {
-    const { name, brandName, phoneNumber, monthlyAmount } = req.body;
+    const { name, brandName, phoneNumber, monthlyAmount, paymentDeadline } =
+      req.body;
     const customer = await Customer.findById(req.params.id);
 
     if (!customer) {
@@ -229,6 +232,8 @@ exports.updateCustomer = async (req, res) => {
     if (brandName !== undefined) customer.brandName = brandName;
     if (phoneNumber !== undefined) customer.phoneNumber = phoneNumber;
     if (monthlyAmount !== undefined) customer.monthlyAmount = monthlyAmount;
+    if (paymentDeadline !== undefined)
+      customer.paymentDeadline = paymentDeadline;
 
     await customer.save();
     res.json(customer);

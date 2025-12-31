@@ -29,6 +29,10 @@ const customerSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
+  paymentDeadline: {
+    type: Date,
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
