@@ -9,7 +9,6 @@ router.post("/", customerController.addCustomer);
 router.get("/", customerController.getCustomers);
 router.post("/pay/:id", customerController.payCustomer);
 router.post("/unpay/:id", customerController.unpayCustomer);
-router.put("/:id", customerController.editCustomer);
 router.delete("/:id", customerController.deleteCustomer);
 
 module.exports = router;

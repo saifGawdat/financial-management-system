@@ -9,6 +9,7 @@ import {
   IoMenuOutline,
   IoCloseOutline,
   IoPeopleOutline,
+  IoPricetagsOutline,
   IoCashOutline,
   IoStatsChartOutline,
   IoSettingsOutline,
@@ -30,6 +31,11 @@ const DashboardLayout = ({ children }) => {
     { path: "/income", icon: IoWalletOutline, label: "Income" },
     { path: "/expense", icon: IoCartOutline, label: "Expenses" },
     { path: "/employees", icon: IoPeopleOutline, label: "Employees" },
+    {
+      path: "/expense-categories",
+      icon: IoPricetagsOutline,
+      label: "Expense Categories",
+    },
     {
       path: "/monthly-salaries",
       icon: IoCashOutline,
@@ -140,6 +146,7 @@ const DashboardLayout = ({ children }) => {
         <main className="flex-1 p-4 lg:p-8 w-full max-w-full overflow-x-hidden">
           {children}
         </main>
+        
       </div>
     </div>
   );

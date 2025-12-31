@@ -12,6 +12,7 @@ import Home from "./pages/Dashboard/Home";
 import Income from "./pages/Dashboard/Income";
 import Expense from "./pages/Dashboard/Expense";
 import Employee from "./pages/Dashboard/Employee";
+import ExpenseCategories from "./pages/Dashboard/ExpenseCategories";
 import MonthlySalaries from "./pages/Dashboard/MonthlySalaries";
 import ProfitSummary from "./pages/Dashboard/ProfitSummary";
 import Customers from "./pages/Dashboard/Customers";
@@ -68,6 +69,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Employee />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/expense-categories"
+          element={
+            <ProtectedRoute>
+              <ExpenseCategories />
             </ProtectedRoute>
           }
         />
