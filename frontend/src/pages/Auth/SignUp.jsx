@@ -89,22 +89,6 @@ const SignUp = () => {
           </Button>
         </form>
 
-        <div className="my-6 flex items-center">
-          <div className="flex-grow border-t border-gray-300"></div>
-          <span className="mx-4 text-gray-500 text-sm">OR</span>
-          <div className="flex-grow border-t border-gray-300"></div>
-        </div>
-
-        <div className="flex justify-center">
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => setError("Google Sign Up failed")}
-            useOneTap
-            width="100%"
-            text="continue_with_"
-            logo_alignment="left"
-          />
-        </div>
 
         <p className="text-center text-gray-600 mt-6">
           Already have an account?{" "}
