@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
+import Button from "../../components/ui/Button";
 import * as XLSX from "xlsx";
+import {IoDownloadOutline} from "react-icons/io5";
 import {
   getEmployees,
   createEmployee,
@@ -275,12 +277,14 @@ const Employee = () => {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <button
+            <Button
               onClick={handleExportExcel}
-              className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-medium transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 w-full sm:w-auto"
+              variant="outline"
+              className="flex items-center justify-center gap-2 w-full sm:w-auto"
             >
-              <span>📊</span> Export to Excel
-            </button>
+              <IoDownloadOutline size={20} />
+              Export to Excel
+            </Button>
             <button
               onClick={() => setShowAdjustmentsModal(true)}
               className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg font-medium transition-all shadow-sm hover:bg-gray-50 flex items-center justify-center gap-2 w-full sm:w-auto"

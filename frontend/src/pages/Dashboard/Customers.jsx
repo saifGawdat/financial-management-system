@@ -153,6 +153,7 @@ const Customers = () => {
       "Brand Name": c.brandName || "N/A",
       "Phone Number": c.phoneNumber,
       "Monthly Amount": c.monthlyAmount,
+      "payment Deadline": c.paymentDeadline,
       Status: c.isPaid ? "Paid" : "Unpaid",
       Month: selectedMonth,
       Year: selectedYear,
