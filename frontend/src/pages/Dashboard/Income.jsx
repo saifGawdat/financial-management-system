@@ -8,6 +8,7 @@ import Modal from "../../components/ui/Modal";
 import MonthYearSelector from "../../components/ui/MonthYearSelector";
 import API from "../../api/axios";
 import { formatCurrency } from "../../utils/formatters";
+import { getIncomes } from "../../api/income";
 import { exportIncomeToExcel } from "../../utils/exportToExcel";
 import { IoAddCircleOutline, IoDownloadOutline } from "react-icons/io5";
 
@@ -25,25 +26,35 @@ const Income = () => {
     description: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  // حالات الترقيم - Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [itemsPerPage] = useState(10);
+  const [paginationLoading, setPaginationLoading] = useState(false);
 
   const fetchIncomes = useCallback(async () => {
     try {
-      const res = await API.get("/income", {
-        params: {
-          month,
-          year,
-          _t: Date.now(), // Cache buster
-        },
-      });
-      // Sort by createdAt (newest first) on the frontend
-      const sortedIncomes = (res.data || []).sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      );
-      setIncomes(sortedIncomes);
+      if (currentPage === 1) {
+        setLoading(true);
+      } else {
+        setPaginationLoading(true);
+      }
+
+      const response = await getIncomes(month, year, currentPage, itemsPerPage);
+
+      setIncomes(response.data);
+      setTotalPages(response.pagination.totalPages);
+      setTotalItems(response.pagination.totalItems);
     } catch (error) {
       console.error("Error fetching incomes:", error);
+    } finally {
+      setLoading(false);
+      setPaginationLoading(false);
     }
-  }, [month, year]);
+  }, [month, year, currentPage, itemsPerPage]);
 
   useEffect(() => {
     fetchIncomes();
@@ -67,6 +78,7 @@ const Income = () => {
         date: new Date().toISOString().split("T")[0],
         description: "",
       });
+      setCurrentPage(1); // العودة للصفحة الأولى بعد الإضافة
       await fetchIncomes();
     } catch (error) {
       console.error("Error adding income:", error);
@@ -146,6 +158,56 @@ const Income = () => {
             onDelete={handleDelete}
             type="income"
           />
+          {/* أدوات التحكم في الترقيم - Pagination Controls */}
+          {!loading && incomes.length > 0 && (
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+              {/* معلومات الصفحة - Page Info */}
+              <div className="text-sm text-gray-600">
+                <span className="font-medium">Showing</span>{" "}
+                <span className="font-bold text-green-600">
+                  {incomes.length}
+                </span>{" "}
+                <span className="font-medium">of</span>{" "}
+                <span className="font-bold text-green-600">{totalItems}</span>{" "}
+                <span className="font-medium">transactions</span>
+              </div>
+
+              {/* أزرار التنقل - Navigation Buttons */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(1, prev - 1))
+                  }
+                  disabled={currentPage === 1 || paginationLoading}
+                  className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <span>←</span>
+                  <span className="hidden sm:inline">Previous</span>
+                </button>
+
+                <div className="px-4 py-2 bg-green-50 border border-green-100 text-green-700 rounded-xl font-bold min-w-[100px] text-center">
+                  {paginationLoading ? (
+                    <span className="text-xs">Loading...</span>
+                  ) : (
+                    <span>
+                      Page {currentPage} of {totalPages}
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                  }
+                  disabled={currentPage >= totalPages || paginationLoading}
+                  className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  <span className="hidden sm:inline">Next</span>
+                  <span>→</span>
+                </button>
+              </div>
+            </div>
+          )}
         </Card>
 
         <Modal

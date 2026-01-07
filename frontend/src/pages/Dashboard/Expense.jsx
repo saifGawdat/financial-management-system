@@ -13,6 +13,7 @@ import {
   deleteExpenseCategory,
   getUniqueCategories,
 } from "../../api/expenseCategory";
+import { getExpenses } from "../../api/expense";
 import { exportExpenseToExcel } from "../../utils/exportToExcel";
 import { formatCurrency } from "../../utils/formatters";
 import {
@@ -33,6 +34,14 @@ const Expense = () => {
   const [year, setYear] = useState(currentDate.getFullYear());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  // حالات الترقيم - Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [itemsPerPage] = useState(10);
+  const [paginationLoading, setPaginationLoading] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     amount: "",
@@ -74,26 +83,30 @@ const Expense = () => {
 
   const fetchExpenses = useCallback(async () => {
     try {
-      const res = await API.get("/expense", {
-        params: {
-          month,
-          year,
-          _t: Date.now(), // Cache buster
-        },
-      });
-      if (Array.isArray(res.data)) {
-        // Sort by createdAt (newest first) on the frontend
-        const sortedExpenses = res.data.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        );
-        setExpenses(sortedExpenses);
+      if (currentPage === 1) {
+        setLoading(true);
       } else {
-        setExpenses([]);
+        setPaginationLoading(true);
       }
+
+      const response = await getExpenses(
+        month,
+        year,
+        currentPage,
+        itemsPerPage
+      );
+
+      setExpenses(response.data);
+      setTotalPages(response.pagination.totalPages);
+      setTotalItems(response.pagination.totalItems);
     } catch (error) {
       console.error("Error fetching expenses:", error);
+      setError("Failed to load expenses");
+    } finally {
+      setLoading(false);
+      setPaginationLoading(false);
     }
-  }, [month, year]);
+  }, [month, year, currentPage, itemsPerPage]);
 
   useEffect(() => {
     if (activeTab === "categories") {
@@ -123,6 +136,7 @@ const Expense = () => {
         date: new Date().toISOString().split("T")[0],
         description: "",
       });
+      setCurrentPage(1); // العودة للصفحة الأولى بعد الإضافة
       await fetchExpenses();
     } catch (error) {
       console.error("Error adding expense:", error);
@@ -319,6 +333,56 @@ const Expense = () => {
               onDelete={handleDelete}
               type="expense"
             />
+            {/* أدوات التحكم في الترقيم - Pagination Controls */}
+            {!loading && expenses.length > 0 && (
+              <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                {/* معلومات الصفحة - Page Info */}
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">Showing</span>{" "}
+                  <span className="font-bold text-red-600">
+                    {expenses.length}
+                  </span>{" "}
+                  <span className="font-medium">of</span>{" "}
+                  <span className="font-bold text-red-600">{totalItems}</span>{" "}
+                  <span className="font-medium">transactions</span>
+                </div>
+
+                {/* أزرار التنقل - Navigation Buttons */}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
+                    }
+                    disabled={currentPage === 1 || paginationLoading}
+                    className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <span>←</span>
+                    <span className="hidden sm:inline">Previous</span>
+                  </button>
+
+                  <div className="px-4 py-2 bg-red-50 border border-red-100 text-red-700 rounded-xl font-bold min-w-[100px] text-center">
+                    {paginationLoading ? (
+                      <span className="text-xs">Loading...</span>
+                    ) : (
+                      <span>
+                        Page {currentPage} of {totalPages}
+                      </span>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                    }
+                    disabled={currentPage >= totalPages || paginationLoading}
+                    className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <span className="hidden sm:inline">Next</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </Card>
         ) : (
           <div className="space-y-6">

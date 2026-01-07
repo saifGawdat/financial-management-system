@@ -1,12 +1,55 @@
 const Employee = require("../models/Employee");
 
-// Get all employees for the authenticated user
+// الحصول على جميع الموظفين للمستخدم المصادق عليه مع دعم الترقيم (Pagination)
+// Get all employees for the authenticated user with pagination support
 const getEmployees = async (req, res) => {
   try {
-    const employees = await Employee.find({ user: req.userId }).sort({
-      createdAt: -1,
+    // استخراج معاملات الترقيم من الاستعلام (Query Parameters)
+    // Extract pagination parameters from query
+    const page = parseInt(req.query.page) || 1; // الصفحة الحالية (افتراضياً: 1)
+    const limit = parseInt(req.query.limit) || 10; // عدد العناصر في الصفحة (افتراضياً: 10)
+
+    // التحقق من صحة المعاملات وتطبيق الحدود
+    // Validate parameters and apply limits
+    const validatedPage = page < 1 ? 1 : page; // لا يمكن أن تكون الصفحة أقل من 1
+    const validatedLimit = limit < 1 ? 10 : limit > 100 ? 100 : limit; // الحد الأدنى: 1، الحد الأقصى: 100
+
+    // حساب عدد العناصر المراد تخطيها
+    // Calculate number of documents to skip
+    const skip = (validatedPage - 1) * validatedLimit;
+
+    // حساب إجمالي عدد الموظفين (لحساب عدد الصفحات)
+    // Count total employees (for calculating total pages)
+    const totalItems = await Employee.countDocuments({
+      user: req.userId,
     });
-    res.json(employees);
+
+    // حساب إجمالي عدد الصفحات
+    // Calculate total pages
+    const totalPages = Math.ceil(totalItems / validatedLimit);
+
+    // جلب الموظفين مع تطبيق الترقيم والترتيب
+    // Fetch employees with pagination and sorting
+    const employees = await Employee.find({ user: req.userId })
+      .sort({ createdAt: -1 }) // ترتيب حسب تاريخ الإنشاء (الأحدث أولاً)
+      .skip(skip) // تخطي العناصر السابقة
+      .limit(validatedLimit) // تحديد عدد العناصر المطلوبة
+      .select("name salary jobTitle phoneNumber dateJoined isActive") // اختيار الحقول المطلوبة فقط لتحسين الأداء
+      .lean(); // تحويل النتائج إلى كائنات JavaScript عادية (أسرع)
+
+    // إرجاع البيانات مع معلومات الترقيم
+    // Return data with pagination metadata
+    res.json({
+      data: employees,
+      pagination: {
+        currentPage: validatedPage, // الصفحة الحالية
+        totalPages: totalPages, // إجمالي عدد الصفحات
+        totalItems: totalItems, // إجمالي عدد الموظفين
+        itemsPerPage: validatedLimit, // عدد العناصر في الصفحة
+        hasNextPage: validatedPage < totalPages, // هل توجد صفحة تالية؟
+        hasPreviousPage: validatedPage > 1, // هل توجد صفحة سابقة؟
+      },
+    });
   } catch (error) {
     console.error("Error fetching employees:", error);
     res.status(500).json({ message: "Server error" });

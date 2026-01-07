@@ -29,19 +29,48 @@ exports.addCustomer = async (req, res) => {
   }
 };
 
-// Get all customers for user with payment status for a specific month/year
+// الحصول على جميع العملاء مع دعم الترقيم وحالة الدفع
+// Get all customers with pagination support and payment status
 exports.getCustomers = async (req, res) => {
   try {
-    const { month, year } = req.query;
-    const customers = await Customer.find({ user: req.userId }).sort({
-      createdAt: -1,
-    });
+    const { month, year, page, limit } = req.query;
 
+    // معاملات الترقيم - Pagination parameters
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 10;
+    const validatedPage = pageNum < 1 ? 1 : pageNum;
+    const validatedLimit = limitNum < 1 ? 10 : limitNum > 100 ? 100 : limitNum;
+    const skip = (validatedPage - 1) * validatedLimit;
+
+    // حساب إجمالي العملاء - Count total customers
+    const totalItems = await Customer.countDocuments({ user: req.userId });
+    const totalPages = Math.ceil(totalItems / validatedLimit);
+
+    // جلب العملاء مع الترقيم - Fetch customers with pagination
+    const customers = await Customer.find({ user: req.userId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(validatedLimit)
+      .lean();
+
+    // إذا لم يتم تحديد شهر/سنة، إرجاع البيانات مع معلومات الترقيم فقط
+    // If no month/year specified, return data with pagination only
     if (!month || !year) {
-      return res.json(customers);
+      return res.json({
+        data: customers,
+        pagination: {
+          currentPage: validatedPage,
+          totalPages: totalPages,
+          totalItems: totalItems,
+          itemsPerPage: validatedLimit,
+          hasNextPage: validatedPage < totalPages,
+          hasPreviousPage: validatedPage > 1,
+        },
+      });
     }
 
-    // Find all income records for these customers in the given month/year
+    // البحث عن سجلات الدفع للشهر/السنة المحددة
+    // Find payment records for the specified month/year
     const startDate = new Date(
       Date.UTC(parseInt(year), parseInt(month) - 1, 1, 0, 0, 0, 0)
     );
@@ -55,19 +84,29 @@ exports.getCustomers = async (req, res) => {
       date: { $gte: startDate, $lte: endDate },
     });
 
-    // Map payment info to customers
+    // إضافة حالة الدفع لكل عميل - Add payment status to each customer
     const customerWithStatus = customers.map((customer) => {
       const payment = payments.find(
         (p) => p.customer.toString() === customer._id.toString()
       );
       return {
-        ...customer.toObject(),
+        ...customer,
         isPaid: !!payment,
         paymentId: payment ? payment._id : null,
       };
     });
 
-    res.json(customerWithStatus);
+    res.json({
+      data: customerWithStatus,
+      pagination: {
+        currentPage: validatedPage,
+        totalPages: totalPages,
+        totalItems: totalItems,
+        itemsPerPage: validatedLimit,
+        hasNextPage: validatedPage < totalPages,
+        hasPreviousPage: validatedPage > 1,
+      },
+    });
   } catch (error) {
     console.error(error);
     if (error.name === "ValidationError") {

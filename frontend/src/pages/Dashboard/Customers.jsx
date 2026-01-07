@@ -22,6 +22,13 @@ const Customers = () => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
+  // حالات الترقيم - Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [itemsPerPage] = useState(10);
+  const [paginationLoading, setPaginationLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     brandName: "",
@@ -35,19 +42,27 @@ const Customers = () => {
 
   const fetchCustomers = React.useCallback(async () => {
     try {
-      setLoading(true);
-      const data = await customerAPI.getAll({
-        month: selectedMonth,
-        year: selectedYear,
-        _t: Date.now(), // Cache buster
-      });
-      setCustomers(data);
+      if (currentPage === 1) {
+        setLoading(true);
+      } else {
+        setPaginationLoading(true);
+      }
+      const response = await customerAPI.getCustomers(
+        selectedMonth,
+        selectedYear,
+        currentPage,
+        itemsPerPage
+      );
+      setCustomers(response.data);
+      setTotalPages(response.pagination.totalPages);
+      setTotalItems(response.pagination.totalItems);
     } catch (error) {
       console.error("Error fetching customers:", error);
     } finally {
       setLoading(false);
+      setPaginationLoading(false);
     }
-  }, [selectedMonth, selectedYear]);
+  }, [selectedMonth, selectedYear, currentPage, itemsPerPage]);
 
   useEffect(() => {
     fetchCustomers();
@@ -136,7 +151,8 @@ const Customers = () => {
         monthlyAmount: "",
         paymentDeadline: "",
       });
-      fetchCustomers();
+      await fetchCustomers();
+      setCurrentPage(1); // العودة للصفحة الأولى بعد الإضافة أو التعديل
     } catch (error) {
       console.error("Error saving customer:", error);
       setError(
@@ -395,6 +411,59 @@ const Customers = () => {
                 <p className="text-gray-500 italic">
                   No customers found. Add your first customer to get started!
                 </p>
+              </div>
+            )}
+
+            {/* أدوات التحكم في الترقيم - Pagination Controls */}
+            {!loading && customers.length > 0 && (
+              <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
+                {/* معلومات الصفحة - Page Info */}
+                <div className="text-sm text-gray-600">
+                  <span className="font-medium">Showing</span>{" "}
+                  <span className="font-bold text-purple-600">
+                    {customers.length}
+                  </span>{" "}
+                  <span className="font-medium">of</span>{" "}
+                  <span className="font-bold text-purple-600">
+                    {totalItems}
+                  </span>{" "}
+                  <span className="font-medium">customers</span>
+                </div>
+
+                {/* أزرار التنقل - Navigation Buttons */}
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
+                    }
+                    disabled={currentPage === 1 || paginationLoading}
+                    className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <span>←</span>
+                    <span className="hidden sm:inline">Previous</span>
+                  </button>
+
+                  <div className="px-4 py-2 bg-purple-50 border border-purple-100 text-purple-700 rounded-xl font-bold min-w-[100px] text-center">
+                    {paginationLoading ? (
+                      <span className="text-xs">Loading...</span>
+                    ) : (
+                      <span>
+                        Page {currentPage} of {totalPages}
+                      </span>
+                    )}
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                    }
+                    disabled={currentPage >= totalPages || paginationLoading}
+                    className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <span className="hidden sm:inline">Next</span>
+                    <span>→</span>
+                  </button>
+                </div>
               </div>
             )}
           </div>

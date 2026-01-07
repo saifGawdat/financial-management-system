@@ -32,11 +32,19 @@ exports.addIncome = async (req, res) => {
   }
 };
 
-// Get all incomes for user
+// الحصول على جميع الإيرادات للمستخدم مع دعم الترقيم (Pagination)
+// Get all incomes for user with pagination support
 exports.getIncomes = async (req, res) => {
   try {
-    const { month, year } = req.query;
+    const { month, year, page, limit } = req.query;
     const query = { user: req.userId };
+
+    // معاملات الترقيم - Pagination parameters
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 10;
+    const validatedPage = pageNum < 1 ? 1 : pageNum;
+    const validatedLimit = limitNum < 1 ? 10 : limitNum > 100 ? 100 : limitNum;
+    const skip = (validatedPage - 1) * validatedLimit;
 
     if (month && year) {
       const startDate = new Date(
@@ -48,8 +56,31 @@ exports.getIncomes = async (req, res) => {
       query.date = { $gte: startDate, $lte: endDate };
     }
 
-    const incomes = await Income.find(query).sort({ date: -1 });
-    res.json(incomes);
+    // حساب إجمالي الإيرادات - Count total incomes
+    const totalItems = await Income.countDocuments(query);
+    const totalPages = Math.ceil(totalItems / validatedLimit);
+
+    // جلب الإيرادات مع تطبيق الترقيم والترتيب
+    // Fetch incomes with pagination and sorting
+    const incomes = await Income.find(query)
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(validatedLimit)
+      .lean();
+
+    // إرجاع البيانات مع معلومات الترقيم
+    // Return data with pagination metadata
+    res.json({
+      data: incomes,
+      pagination: {
+        currentPage: validatedPage,
+        totalPages: totalPages,
+        totalItems: totalItems,
+        itemsPerPage: validatedLimit,
+        hasNextPage: validatedPage < totalPages,
+        hasPreviousPage: validatedPage > 1,
+      },
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });

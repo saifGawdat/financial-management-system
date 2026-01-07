@@ -1,9 +1,17 @@
 import axios from "./axios";
 
-// Get all employees
-export const getEmployees = async () => {
-  const response = await axios.get("/employee");
-  return response.data;
+// الحصول على جميع الموظفين مع دعم الترقيم (Pagination)
+// Get all employees with pagination support
+export const getEmployees = async (page = 1, limit = 10) => {
+  // بناء معاملات الاستعلام (Query Parameters)
+  // Build query parameters
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString(),
+  });
+
+  const response = await axios.get(`/employee?${params.toString()}`);
+  return response.data; // يحتوي على data و pagination
 };
 
 // Get active employees only

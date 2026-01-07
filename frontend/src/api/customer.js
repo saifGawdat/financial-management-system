@@ -1,8 +1,16 @@
 import API from "./axios";
 
 export const customerAPI = {
-  getAll: async (params) => {
-    const response = await API.get("/customer", { params });
+  getCustomers: async (month, year, page = 1, limit = 10) => {
+    const params = new URLSearchParams({
+      page: page.toString(),
+      limit: limit.toString(),
+    });
+
+    if (month) params.append("month", month);
+    if (year) params.append("year", year);
+
+    const response = await API.get(`/customer?${params.toString()}`);
     return response.data;
   },
 

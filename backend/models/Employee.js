@@ -38,7 +38,14 @@ const employeeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// Index for faster queries
+// فهرس لتسريع الاستعلامات الأساسية (البحث حسب المستخدم والحالة النشطة)
+// Index for faster queries (search by user and active status)
 employeeSchema.index({ user: 1, isActive: 1 });
+
+// فهرس مركب لتحسين أداء الترقيم (Pagination)
+// يدعم الفلترة حسب المستخدم والترتيب حسب تاريخ الإنشاء (الأحدث أولاً)
+// Compound index for pagination optimization
+// Supports filtering by user and sorting by creation date (newest first)
+employeeSchema.index({ user: 1, createdAt: -1 });
 
 module.exports = mongoose.model("Employee", employeeSchema);

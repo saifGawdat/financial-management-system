@@ -40,4 +40,8 @@ const incomeSchema = new mongoose.Schema({
   },
 });
 
+// فهرس مركب لتحسين أداء الترقيم (Pagination)
+// Compound index for pagination optimization
+incomeSchema.index({ user: 1, date: -1 });
+
 module.exports = mongoose.model("Income", incomeSchema);

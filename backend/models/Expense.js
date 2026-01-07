@@ -35,4 +35,8 @@ const expenseSchema = new mongoose.Schema({
   },
 });
 
+// فهرس مركب لتحسين أداء الترقيم (Pagination)
+// Compound index for pagination optimization
+expenseSchema.index({ user: 1, date: -1 });
+
 module.exports = mongoose.model("Expense", expenseSchema);

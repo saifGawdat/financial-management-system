@@ -32,11 +32,19 @@ exports.addExpense = async (req, res) => {
   }
 };
 
-// Get all expenses for user
+// الحصول على جميع المصاريف للمستخدم مع دعم الترقيم (Pagination)
+// Get all expenses for user with pagination support
 exports.getExpenses = async (req, res) => {
   try {
-    const { month, year } = req.query;
+    const { month, year, page, limit } = req.query;
     const query = { user: req.userId };
+
+    // معاملات الترقيم - Pagination parameters
+    const pageNum = parseInt(page) || 1;
+    const limitNum = parseInt(limit) || 10;
+    const validatedPage = pageNum < 1 ? 1 : pageNum;
+    const validatedLimit = limitNum < 1 ? 10 : limitNum > 100 ? 100 : limitNum;
+    const skip = (validatedPage - 1) * validatedLimit;
 
     if (month && year) {
       const startDate = new Date(
@@ -48,10 +56,31 @@ exports.getExpenses = async (req, res) => {
       query.date = { $gte: startDate, $lte: endDate };
     }
 
-    const expenses = await Expense.find(query).sort({
-      date: -1,
+    // حساب إجمالي المصاريف - Count total expenses
+    const totalItems = await Expense.countDocuments(query);
+    const totalPages = Math.ceil(totalItems / validatedLimit);
+
+    // جلب المصاريف مع تطبيق الترقيم والترتيب
+    // Fetch expenses with pagination and sorting
+    const expenses = await Expense.find(query)
+      .sort({ date: -1 })
+      .skip(skip)
+      .limit(validatedLimit)
+      .lean();
+
+    // إرجاع البيانات مع معلومات الترقيم
+    // Return data with pagination metadata
+    res.json({
+      data: expenses,
+      pagination: {
+        currentPage: validatedPage,
+        totalPages: totalPages,
+        totalItems: totalItems,
+        itemsPerPage: validatedLimit,
+        hasNextPage: validatedPage < totalPages,
+        hasPreviousPage: validatedPage > 1,
+      },
     });
-    res.json(expenses);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });

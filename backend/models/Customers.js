@@ -39,4 +39,8 @@ const customerSchema = new mongoose.Schema({
   },
 });
 
+// فهرس مركب لتحسين أداء الترقيم (Pagination)
+// Compound index for pagination optimization
+customerSchema.index({ user: 1, createdAt: -1 });
+
 module.exports = mongoose.model("Customer", customerSchema);

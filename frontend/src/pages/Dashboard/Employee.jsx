@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import Button from "../../components/ui/Button";
 import * as XLSX from "xlsx";
-import {IoDownloadOutline} from "react-icons/io5";
+import { IoDownloadOutline } from "react-icons/io5";
 import {
   getEmployees,
   createEmployee,
@@ -31,22 +31,49 @@ const Employee = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isAddingTransaction, setIsAddingTransaction] = useState(false);
 
-  useEffect(() => {
-    fetchEmployees();
-  }, []);
+  // حالة الترقيم (Pagination State)
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1); // الصفحة الحالية
+  const [totalPages, setTotalPages] = useState(1); // إجمالي عدد الصفحات
+  const [totalItems, setTotalItems] = useState(0); // إجمالي عدد الموظفين
+  const [itemsPerPage] = useState(10); // عدد الموظفين في الصفحة
+  const [paginationLoading, setPaginationLoading] = useState(false); // حالة التحميل أثناء تغيير الصفحة
 
-  const fetchEmployees = async () => {
+  // دالة جلب الموظفين مع دعم الترقيم (مع useCallback لتجنب إعادة الإنشاء)
+  // Function to fetch employees with pagination (with useCallback to avoid recreation)
+  const fetchEmployees = useCallback(async () => {
     try {
-      setLoading(true);
-      const data = await getEmployees();
-      setEmployees(data);
+      // إظهار مؤشر التحميل المناسب
+      // Show appropriate loading indicator
+      if (currentPage === 1) {
+        setLoading(true); // تحميل كامل للصفحة الأولى
+      } else {
+        setPaginationLoading(true); // تحميل خفيف لتغيير الصفحة
+      }
+
+      // جلب البيانات من الـ API
+      // Fetch data from API
+      const response = await getEmployees(currentPage, itemsPerPage);
+
+      // تحديث الحالة بالبيانات والمعلومات الوصفية
+      // Update state with data and metadata
+      setEmployees(response.data);
+      setTotalPages(response.pagination.totalPages);
+      setTotalItems(response.pagination.totalItems);
     } catch (error) {
       console.error("Error fetching employees:", error);
       setError("Failed to load employees");
     } finally {
       setLoading(false);
+      setPaginationLoading(false);
     }
-  };
+  }, [currentPage, itemsPerPage]);
+
+  // جلب الموظفين عند تحميل الصفحة أو تغيير رقم الصفحة
+  // Fetch employees on mount or page change
+  useEffect(() => {
+    fetchEmployees();
+  }, [fetchEmployees]); // إعادة الجلب عند تغيير الصفحة
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -69,6 +96,9 @@ const Employee = () => {
         dateJoined: new Date().toISOString().split("T")[0],
       });
       setEditingEmployee(null);
+      // العودة إلى الصفحة الأولى بعد إضافة/تعديل موظف
+      // Return to first page after adding/editing employee
+      setCurrentPage(1);
       await fetchEmployees();
     } catch (error) {
       console.error("Error saving employee:", error);
@@ -96,6 +126,9 @@ const Employee = () => {
     if (window.confirm("Are you sure you want to delete this employee?")) {
       try {
         await deleteEmployee(id);
+        // العودة إلى الصفحة الأولى بعد حذف موظف
+        // Return to first page after deleting employee
+        setCurrentPage(1);
         fetchEmployees();
       } catch (error) {
         console.error("Error deleting employee:", error);
@@ -365,25 +398,25 @@ const Employee = () => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-linear-to-r from-gray-50 to-gray-100">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-3 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       Name
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-3 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       Job Title
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-3 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       Base Salary
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-3 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       Bonuses
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-3 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       Deductions
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-3 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       Net Salary
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    <th className="px-3 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -396,7 +429,7 @@ const Employee = () => {
                         key={employee._id}
                         className="hover:bg-blue-50 transition-colors"
                       >
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-4 whitespace-nowrap">
                           <div className="text-sm font-semibold text-gray-900">
                             {employee.name}
                           </div>
@@ -404,7 +437,7 @@ const Employee = () => {
                             {employee.phoneNumber || "N/A"}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-600">
                             {employee.jobTitle}
                           </div>
@@ -412,31 +445,31 @@ const Employee = () => {
                             Joined: {formatDate(employee.dateJoined)}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-gray-600">
                             {formatCurrency(employee.salary)}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-green-600">
                             {stats.bonuses > 0
                               ? `+${stats.bonuses.toLocaleString()}`
                               : "-"}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-4 whitespace-nowrap">
                           <div className="text-sm font-medium text-red-600">
                             {stats.deductions > 0
                               ? `-${stats.deductions.toLocaleString()}`
                               : "-"}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-3 py-4 whitespace-nowrap">
                           <div className="text-sm font-bold text-blue-700 bg-blue-50 px-2 py-1 rounded w-fit">
                             {formatCurrency(stats.netSalary)}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <td className="px-3 py-4 whitespace-nowrap text-sm">
                           <div className="flex gap-2">
                             <button
                               onClick={() => handleEdit(employee)}
@@ -460,6 +493,59 @@ const Employee = () => {
             </div>
           )}
         </div>
+
+        {/* أدوات التحكم في الترقيم (Pagination Controls) */}
+        {/* Pagination Controls */}
+        {!loading && employees.length > 0 && (
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-lg shadow-md border border-gray-200">
+            {/* معلومات الصفحة - Page Information */}
+            <div className="text-sm text-gray-600 text-center sm:text-left">
+              <span className="font-medium">Showing</span>{" "}
+              <span className="font-bold text-blue-600">
+                {employees.length}
+              </span>{" "}
+              <span className="font-medium">of</span>{" "}
+              <span className="font-bold text-blue-600">{totalItems}</span>{" "}
+              <span className="font-medium">employees</span>
+            </div>
+
+            {/* أزرار التنقل - Navigation Buttons */}
+            <div className="flex items-center gap-3">
+              {/* زر الصفحة السابقة - Previous Button */}
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                disabled={currentPage === 1 || paginationLoading}
+                className="px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-medium transition-all hover:bg-gray-50 hover:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300 flex items-center gap-2"
+              >
+                <span>←</span>
+                <span className="hidden sm:inline">Previous</span>
+              </button>
+
+              {/* مؤشر الصفحة الحالية - Current Page Indicator */}
+              <div className="px-4 py-2 bg-blue-50 border-2 border-blue-500 text-blue-700 rounded-lg font-bold min-w-[120px] text-center">
+                {paginationLoading ? (
+                  <span className="text-sm">Loading...</span>
+                ) : (
+                  <span>
+                    Page {currentPage} of {totalPages}
+                  </span>
+                )}
+              </div>
+
+              {/* زر الصفحة التالية - Next Button */}
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                }
+                disabled={currentPage >= totalPages || paginationLoading}
+                className="px-4 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-medium transition-all hover:bg-gray-50 hover:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white disabled:hover:border-gray-300 flex items-center gap-2"
+              >
+                <span className="hidden sm:inline">Next</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Modal */}
         {showModal && (
