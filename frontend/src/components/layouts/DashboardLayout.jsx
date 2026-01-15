@@ -70,17 +70,17 @@ const DashboardLayout = ({ children }) => {
         {/* Sidebar */}
         <aside
           className={`
-          fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out h-screen lg:h-auto lg:min-h-screen flex flex-col
+          fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white shadow-lg transform transition-transform duration-300 ease-in-out h-screen lg:h-auto lg:min-h-screen flex flex-col
           ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }
         `}
         >
           {/* Header */}
-          <div className="p-6 border-b border-gray-200 flex justify-between items-center">
+          <div className="p-6 border-b border-gray-200 flex flex-col justify-center items-center">
             <div>
-              <h1 className="text-2xl font-bold text-purple-600">
-                Financial Management System
+              <h1 className="text-2xl font-bold text-purple-600 text-center">
+                Financial <br/> Management <br/> System
               </h1>
               <p className="text-sm text-gray-500 mt-1">
                 Welcome, {user?.name}

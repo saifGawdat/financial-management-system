@@ -28,9 +28,9 @@ const Login = () => {
 
   return (
     <AuthLayout>
-      <div>
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">Welcome Back</h2>
-        <p className="text-gray-600 mb-6">
+      <div className="">
+        <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">Welcome Back</h2>
+        <p className="text-gray-600 mb-6 text-center">
           Sign in to continue to your account
         </p>
 

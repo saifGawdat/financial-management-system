@@ -118,7 +118,7 @@ const Home = () => {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 items-center justify-center">
         <Card title="Income vs Expense" subtitle="Monthly comparison">
           <BarChart data={chartData.barChartData} />
         </Card>

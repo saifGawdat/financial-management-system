@@ -258,7 +258,7 @@ const Expense = () => {
                   )}
                 </span>
               </p>
-              <div className="hidden md:block h-6 w-px bg-gray-300 mx-2"></div>
+              <div className="hidden md:block h-6 w-px bg-gray-300 mx-2 "></div>
               <MonthYearSelector
                 onSelect={(m, y) => {
                   setMonth(m);
@@ -470,6 +470,17 @@ const Expense = () => {
             </div>
 
             {/* Breakdown Chart */}
+            {totalCategoryExpenses === 0 && (
+              <Card className="p-6">
+                <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                  <IoGridOutline className="text-purple-600" />
+                  Category Breakdown
+                </h3>
+                <p className="text-gray-400 text-center py-6 text-sm italic">
+                  No spend recorded
+                </p>
+              </Card>
+            )}
             {totalCategoryExpenses > 0 && (
               <Card className="p-6">
                 <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">

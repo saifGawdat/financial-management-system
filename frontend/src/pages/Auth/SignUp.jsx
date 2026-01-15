@@ -33,10 +33,10 @@ const SignUp = () => {
   return (
     <AuthLayout>
       <div>
-        <h2 className="text-3xl font-bold text-gray-800 mb-2">
+        <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">
           Create Account
         </h2>
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-600 mb-6 text-center">
           Sign up to start tracking your expenses
         </p>
 
@@ -78,7 +78,6 @@ const SignUp = () => {
             Sign Up
           </Button>
         </form>
-
 
         <p className="text-center text-gray-600 mt-6">
           Already have an account?{" "}

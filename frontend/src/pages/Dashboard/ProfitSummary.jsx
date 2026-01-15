@@ -113,7 +113,7 @@ const ProfitSummary = () => {
               onClick={() => setViewMode("single")}
               className={`px-6 py-2 rounded-lg font-medium transition-colors flex-1 md:flex-none ${
                 viewMode === "single"
-                  ? "bg-blue-600 text-white"
+                  ? "bg-purple-600 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
             >
@@ -123,7 +123,7 @@ const ProfitSummary = () => {
               onClick={() => setViewMode("all")}
               className={`px-6 py-2 rounded-lg font-medium transition-colors flex-1 md:flex-none ${
                 viewMode === "all"
-                  ? "bg-blue-600 text-white"
+                  ? "bg-purple-600 text-white"
                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
               }`}
             >
@@ -149,7 +149,7 @@ const ProfitSummary = () => {
                 className={`w-full md:w-auto px-6 py-3 rounded-lg font-medium transition-colors ${
                   recalculating
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-green-600 hover:bg-green-700"
+                    : "bg-purple-700 hover:bg-purple-900"
                 } text-white`}
               >
                 {recalculating ? "Recalculating..." : "Recalculate"}
@@ -168,7 +168,7 @@ const ProfitSummary = () => {
                     summary.profit >= 0
                       ? "bg-linear-to-r from-green-500 to-green-600"
                       : "bg-linear-to-r from-red-500 to-red-600"
-                  } text-white`}
+                  } text-white flex flex-col justify-center items-center`}
                 >
                   <p className="text-xl opacity-90">
                     {getMonthName(summary.month)} {summary.year} Profit
@@ -182,20 +182,20 @@ const ProfitSummary = () => {
                 </div>
 
                 {/* Financial Overview */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <div className="bg-white p-6 rounded-lg shadow">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6 ">
+                  <div className="bg-white p-6 rounded-lg shadow flex flex-col justify-center items-center">
                     <p className="text-gray-600 text-sm">Total Income</p>
                     <p className="text-3xl font-bold text-green-600 mt-2">
                       {formatCurrency(summary.totalIncome)}
                     </p>
                   </div>
-                  <div className="bg-white p-6 rounded-lg shadow">
+                  <div className="bg-white p-6 rounded-lg shadow flex flex-col justify-center items-center">
                     <p className="text-gray-600 text-sm">Total Expenses</p>
                     <p className="text-3xl font-bold text-red-600 mt-2">
                       {formatCurrency(summary.totalExpenses)}
                     </p>
                   </div>
-                  <div className="bg-white p-6 rounded-lg shadow">
+                  <div className="bg-white p-6 rounded-lg shadow flex flex-col justify-center items-center">
                     <p className="text-gray-600 text-sm">Total Salaries</p>
                     <p className="text-3xl font-bold text-blue-600 mt-2">
                       {formatCurrency(summary.totalSalaries)}
@@ -204,12 +204,12 @@ const ProfitSummary = () => {
                 </div>
 
                 {/* Income Breakdown */}
-                <div className="bg-white p-6 rounded-lg shadow mb-6">
+                <div className="bg-white p-6 rounded-lg shadow mb-6 flex flex-col justify-center items-center">
                   <h3 className="text-xl font-bold text-gray-800 mb-4">
                     Income Breakdown
                   </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="p-4 bg-green-50 rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-1 gap-4 w-full text-center">
+                    <div className="p-4 bg-green-50 rounded-lg w-full">
                       <p className="text-gray-700 font-medium">
                         Monthly Collections
                       </p>
@@ -219,16 +219,7 @@ const ProfitSummary = () => {
                         )}
                       </p>
                     </div>
-                    <div className="p-4 bg-red-50 rounded-lg">
-                      <p className="text-gray-700 font-medium">
-                        Advertising Expenses
-                      </p>
-                      <p className="text-2xl font-bold text-red-600 mt-1">
-                        {formatCurrency(
-                          summary.incomeBreakdown.advertisingExpenses
-                        )}
-                      </p>
-                    </div>
+                
                   </div>
                 </div>
 

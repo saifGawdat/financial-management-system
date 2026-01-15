@@ -63,7 +63,7 @@ const MonthlySalaries = () => {
         )}
 
         {/* Month/Year Selector */}
-        <div className="bg-white p-4 md:p-6 rounded-2xl shadow-md mb-6 flex justify-center md:justify-start border border-gray-100">
+        <div className="bg-gray-50 p-4 md:p-6 rounded-2xl shadow-md mb-6 flex md:justify-start border border-gray-100 ">
           <MonthYearSelector
             onSelect={handleMonthYearChange}
             initialMonth={month}
@@ -72,7 +72,7 @@ const MonthlySalaries = () => {
         </div>
 
         {/* Total Salaries Card */}
-        <div className="bg-linear-to-r from-blue-600 to-indigo-700 text-white p-6 md:p-8 rounded-3xl shadow-xl mb-6 text-center md:text-left relative overflow-hidden">
+        <div className="bg-linear-to-r from-blue-600 to-indigo-700 text-white p-6 md:p-8 rounded-3xl shadow-xl mb-6 text-center md:text-left relative overflow-hidden flex flex-col items-center justify-center">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
           <p className="text-lg md:text-xl opacity-90">
             Total Salaries for {getMonthName(month)} {year}
@@ -198,7 +198,7 @@ const MonthlySalaries = () => {
             </div>
             <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
               <p className="text-gray-600 text-sm">Lowest Salary</p>
-              <p className="text-3xl font-bold text-orange-600 mt-2">
+              <p className="text-3xl font-bold text-purple-700 mt-2">
                 £{Math.min(...employees.map((e) => e.salary)).toLocaleString()}
               </p>
             </div>

@@ -4,7 +4,7 @@ import { formatCurrency } from "../../utils/formatters";
 const SummaryCard = ({ title, amount, icon: Icon, iconColor, bgGradient }) => {
   return (
     <div
-      className={`bg-gradient-to-br ${bgGradient} rounded-3xl shadow-2xl p-8 text-white transform hover:scale-105 transition-all duration-300 relative overflow-hidden group`}
+      className={`bg-linear-to-br ${bgGradient} rounded-3xl shadow-2xl p-8 text-white transform hover:scale-105 transition-all duration-300 relative overflow-hidden group`}
     >
       <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:scale-110 transition-transform duration-500"></div>
       <div className="flex items-center justify-between">

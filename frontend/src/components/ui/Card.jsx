@@ -3,7 +3,7 @@ import React from "react";
 const Card = ({ children, className = "", title, subtitle }) => {
   return (
     <div
-      className={`bg-white rounded-3xl shadow-2xl p-8 border border-gray-100/50 ${className}`}
+      className={`bg-white rounded-3xl shadow-2xl p-8 border border-gray-100/50 ${className} flex flex-col justify-center items-center min-w-full`}
     >
       {title && (
         <div className="mb-4">

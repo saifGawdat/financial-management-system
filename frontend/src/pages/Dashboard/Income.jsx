@@ -109,7 +109,7 @@ const Income = () => {
 
   return (
     <DashboardLayout>
-      <div>
+      <div >
         <div className="flex flex-col md:flex-row justify-between items-center md:items-center mb-6 gap-6 text-center md:text-left">
           <div className="w-full">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-800">

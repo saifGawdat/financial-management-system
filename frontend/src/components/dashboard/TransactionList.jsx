@@ -12,11 +12,11 @@ const TransactionList = ({ transactions, onDelete, type }) => {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 w-full">
       {transactions.map((transaction) => (
         <div
           key={transaction._id}
-          className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow group gap-4"
+          className="flex flex-col  sm:flex-row items-start sm:items-center justify-between p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow group gap-4"
         >
           <div className="flex-1 w-full">
             <h4 className="font-semibold text-gray-800 break-words">

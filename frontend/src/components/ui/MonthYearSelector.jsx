@@ -44,13 +44,13 @@ const MonthYearSelector = ({ onSelect, initialMonth, initialYear }) => {
   };
 
   return (
-    <div className="flex gap-4 items-center">
-      <div className="flex flex-col">
+    <div className="flex gap-3 items-center">
+      <div className="flex flex-col justify-center items-center ">
         <label className="text-sm font-medium text-gray-700 mb-1">Month</label>
         <select
           value={month}
           onChange={handleMonthChange}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-1 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           {months.map((m) => (
             <option key={m.value} value={m.value}>
@@ -64,7 +64,7 @@ const MonthYearSelector = ({ onSelect, initialMonth, initialYear }) => {
         <select
           value={year}
           onChange={handleYearChange}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           {years.map((y) => (
             <option key={y} value={y}>

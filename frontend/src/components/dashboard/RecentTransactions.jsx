@@ -12,13 +12,13 @@ const RecentTransactions = ({ transactions }) => {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-5 min-w-full">
       {transactions.map((transaction) => (
         <div
           key={transaction._id}
-          className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow"
+          className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow " 
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 ">
             <div
               className={`p-2 rounded-full ${
                 transaction.type === "income" ? "bg-green-100" : "bg-red-100"

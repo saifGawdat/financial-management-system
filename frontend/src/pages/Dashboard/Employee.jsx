@@ -341,13 +341,13 @@ const Employee = () => {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="bg-linear-to-r from-blue-50 to-blue-100 p-6 rounded-lg shadow-md border border-blue-200">
+          <div className="bg-linear-to-r from-blue-50 to-blue-100 p-6 rounded-lg shadow-md border border-blue-200 flex items-center justify-center flex-col">
             <p className="text-blue-700 text-sm font-medium">Total Employees</p>
             <p className="text-4xl font-bold text-blue-900 mt-2">
               {filteredEmployees.length}
             </p>
           </div>
-          <div className="bg-linear-to-r from-green-50 to-green-100 p-6 rounded-lg shadow-md border border-green-200">
+          <div className="bg-linear-to-r from-green-50 to-green-100 p-6 rounded-lg shadow-md border border-green-200 flex items-center justify-center flex-col">
             <p className="text-green-700 text-sm font-medium">
               Total Net Salaries
             </p>
@@ -358,7 +358,7 @@ const Employee = () => {
               Base: {formatCurrency(totalBaseSalaries)}
             </p>
           </div>
-          <div className="bg-linear-to-r from-purple-50 to-purple-100 p-6 rounded-lg shadow-md border border-purple-200">
+          <div className="bg-linear-to-r from-purple-50 to-purple-100 p-6 rounded-lg shadow-md border border-purple-200 flex items-center justify-center flex-col">
             <p className="text-purple-700 text-sm font-medium">
               Average Net Salary
             </p>
@@ -394,9 +394,9 @@ const Employee = () => {
               No employees found. Click "Add Employee" to get started.
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-linear-to-r from-gray-50 to-gray-100">
+            <div className="overflow-x-hidden">
+              <table className="min-w-full divide-y divide-gray-200 ">
+                <thead className="bg-gray-200">
                   <tr>
                     <th className="px-3 py-4 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
                       Name
@@ -421,7 +421,7 @@ const Employee = () => {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-gray-200 ">
                   {filteredEmployees.map((employee) => {
                     const stats = getEmployeeStats(employee);
                     return (
@@ -470,7 +470,7 @@ const Employee = () => {
                           </div>
                         </td>
                         <td className="px-3 py-4 whitespace-nowrap text-sm">
-                          <div className="flex gap-2">
+                          <div className="flex gap-4">
                             <button
                               onClick={() => handleEdit(employee)}
                               className="text-blue-600 hover:text-blue-800 font-medium transition-colors"

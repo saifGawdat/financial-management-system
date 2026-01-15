@@ -4,7 +4,7 @@
 /* Theme CSS Variables */
 :root {
   /* Background colors */
-  --color-bg-primary: #fcfbfc;
+  --color-bg-primary: #0077b6;
   --color-bg-secondary: #ffffff;
   --color-bg-tertiary: #f3f4f6;
   --color-bg-hover: #f9fafb;
@@ -19,7 +19,7 @@
   --color-border-hover: #d1d5db;
 
   /* Accent colors (remain consistent) */
-  --color-accent-purple: #9333ea;
+  --color-accent-purple: #0077b6;
   --color-accent-green: #22c55e;
   --color-accent-red: #ef4444;
 
@@ -47,7 +47,7 @@
 
 @layer base {
   body {
-    background-color: #fcfbfc;
+    background-color: #0077b6;
     overflow-x: hidden;
   }
   html {
