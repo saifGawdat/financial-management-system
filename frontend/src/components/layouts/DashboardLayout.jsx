@@ -79,7 +79,7 @@ const DashboardLayout = ({ children }) => {
           {/* Header */}
           <div className="p-6 border-b border-gray-200 flex flex-col justify-center items-center">
             <div>
-              <h1 className="text-2xl font-bold text-purple-600 text-center">
+              <h1 className="text-2xl font-bold text-purple-500 text-center">
                 Financial <br/> Management <br/> System
               </h1>
               <p className="text-sm text-gray-500 mt-1">
@@ -105,7 +105,7 @@ const DashboardLayout = ({ children }) => {
                     onClick={() => setSidebarOpen(false)}
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                       location.pathname === item.path
-                        ? "bg-purple-600 text-white shadow-lg"
+                        ? "bg-purple-500 text-white shadow-lg"
                         : "text-gray-700 hover:bg-gray-100"
                     }`}
                   >
@@ -138,7 +138,7 @@ const DashboardLayout = ({ children }) => {
         )}
 
         {/* Main content */}
-        <main className="flex-1 p-4 lg:p-8 w-full max-w-full overflow-x-hidden">
+        <main className="flex-1 p-4 lg:p-16 w-full max-w-full overflow-x-hidden ">
           {children}
         </main>
       </div>

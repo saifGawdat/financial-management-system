@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap");
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
 @import "tailwindcss";
 
 /* Theme CSS Variables */
@@ -30,19 +30,19 @@
 }
 
 @theme {
-  --font-display: "Roboto Slab", serif;
-  --font-body: "Roboto Slab", serif;
-  --font-heading: "Roboto Slab", serif;
-  --font-button: "Roboto Slab", serif;
-  --font-caption: "Roboto Slab", serif;
-  --font-label: "Roboto Slab", serif;
-  --font-legend: "Roboto Slab", serif;
-  --font-menu: "Roboto Slab", serif;
-  --font-message: "Roboto Slab", serif;
-  --font-placeholder: "Roboto Slab", serif;
-  --font-small-caption: "Roboto Slab", serif;
-  --font-subhead: "Roboto Slab", serif;
-  --font-title: "Roboto Slab", serif;
+  --font-display: "Outfit", serif;
+  --font-body: "Outfit", serif;
+  --font-heading: "Outfit", serif;
+  --font-button: "Outfit", serif;
+  --font-caption: "Outfit", serif;
+  --font-label: "Outfit", serif;
+  --font-legend: "Outfit", serif;
+  --font-menu: "Outfit", serif;
+  --font-message: "Outfit", serif;
+  --font-placeholder: "Outfit", serif;
+  --font-small-caption: "Outfit", serif;
+  --font-subhead: "Outfit", serif;
+  --font-title: "outfit ", serif;
 }
 
 @layer base {
