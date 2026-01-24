@@ -104,21 +104,21 @@ const Income = () => {
 
   const totalIncome = incomes.reduce(
     (sum, income) => sum + Number(income.amount || 0),
-    0
+    0,
   );
 
   return (
     <DashboardLayout>
-      <div >
+      <div>
         <div className="flex flex-col md:flex-row justify-between items-center md:items-center mb-6 gap-6 text-center md:text-left">
           <div className="w-full">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-100">
               Income Management
             </h1>
             <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 mt-2 justify-center md:justify-start">
-              <p className="text-gray-600">
+              <p className="text-gray-400">
                 Total Income:{" "}
-                <span className="text-green-600 font-bold text-xl">
+                <span className="text-blue-500 font-bold text-xl">
                   {formatCurrency(totalIncome)}
                 </span>
               </p>
@@ -160,15 +160,15 @@ const Income = () => {
           />
           {/* أدوات التحكم في الترقيم - Pagination Controls */}
           {!loading && incomes.length > 0 && (
-            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+            <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/2 p-4 rounded-xl border border-white/6">
               {/* معلومات الصفحة - Page Info */}
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-400">
                 <span className="font-medium">Showing</span>{" "}
-                <span className="font-bold text-green-600">
+                <span className="font-bold text-green-400">
                   {incomes.length}
                 </span>{" "}
                 <span className="font-medium">of</span>{" "}
-                <span className="font-bold text-green-600">{totalItems}</span>{" "}
+                <span className="font-bold text-green-400">{totalItems}</span>{" "}
                 <span className="font-medium">transactions</span>
               </div>
 
@@ -179,13 +179,13 @@ const Income = () => {
                     setCurrentPage((prev) => Math.max(1, prev - 1))
                   }
                   disabled={currentPage === 1 || paginationLoading}
-                  className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 bg-white/3 border border-white/6 text-gray-300 rounded-xl font-medium transition-all hover:bg-white/6 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   <span>←</span>
                   <span className="hidden sm:inline">Previous</span>
                 </button>
 
-                <div className="px-4 py-2 bg-green-50 border border-green-100 text-green-700 rounded-xl font-bold min-w-[100px] text-center">
+                <div className="px-4 py-2 bg-blue-600/10 border border-blue-500/20 text-blue-400 rounded-xl font-bold min-w-[100px] text-center">
                   {paginationLoading ? (
                     <span className="text-xs">Loading...</span>
                   ) : (
@@ -200,7 +200,7 @@ const Income = () => {
                     setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                   }
                   disabled={currentPage >= totalPages || paginationLoading}
-                  className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 bg-white/3 border border-white/6 text-gray-300 rounded-xl font-medium transition-all hover:bg-white/6 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   <span className="hidden sm:inline">Next</span>
                   <span>→</span>
@@ -249,8 +249,8 @@ const Income = () => {
               onChange={handleChange}
               required
             />
-            <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-semibold mb-2">
+            <div className="mb-6">
+              <label className="block text-gray-300 text-sm font-medium mb-2">
                 Description (Optional)
               </label>
               <textarea
@@ -258,7 +258,7 @@ const Income = () => {
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Add notes..."
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 bg-white/3 border border-white/6 rounded-xl text-gray-100 placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50 focus:bg-white/5 focus:ring-2 focus:ring-blue-500/20 transition-all duration-150"
                 rows="3"
               />
             </div>

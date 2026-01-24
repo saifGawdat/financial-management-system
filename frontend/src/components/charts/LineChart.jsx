@@ -13,24 +13,61 @@ import {
 const LineChart = ({ data }) => {
   return (
     <ResponsiveContainer width="100%" height={300}>
-      <RechartsLineChart data={data}>
-        <CartesianGrid strokeDasharray="3 3" />
-        <XAxis dataKey="date" />
-        <YAxis />
-        <Tooltip />
-        <Legend />
+      <RechartsLineChart
+        data={data}
+        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+      >
+        <CartesianGrid
+          strokeDasharray="3 3"
+          stroke="rgba(255,255,255,0.05)"
+          vertical={false}
+        />
+        <XAxis
+          dataKey="date"
+          axisLine={false}
+          tickLine={false}
+          tick={{ fill: "#6b7280", fontSize: 12 }}
+          dy={10}
+        />
+        <YAxis
+          axisLine={false}
+          tickLine={false}
+          tick={{ fill: "#6b7280", fontSize: 12 }}
+        />
+        <Tooltip
+          contentStyle={{
+            backgroundColor: "#1f2229",
+            border: "1px solid rgba(255,255,255,0.1)",
+            borderRadius: "8px",
+            fontSize: "12px",
+            color: "#e5e7eb",
+          }}
+          itemStyle={{ color: "#e5e7eb" }}
+        />
+        <Legend
+          wrapperStyle={{
+            paddingTop: "20px",
+            fontSize: "12px",
+            color: "#9ca3af",
+          }}
+          iconType="circle"
+        />
         <Line
           type="monotone"
           dataKey="income"
-          stroke="#10b981"
-          strokeWidth={2}
+          stroke="#3b82f6"
+          strokeWidth={3}
+          dot={{ r: 4, fill: "#3b82f6", strokeWidth: 0 }}
+          activeDot={{ r: 6, strokeWidth: 0 }}
           name="Income"
         />
         <Line
           type="monotone"
           dataKey="expense"
           stroke="#ef4444"
-          strokeWidth={2}
+          strokeWidth={3}
+          dot={{ r: 4, fill: "#ef4444", strokeWidth: 0 }}
+          activeDot={{ r: 6, strokeWidth: 0 }}
           name="Expense"
         />
       </RechartsLineChart>

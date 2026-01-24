@@ -33,15 +33,15 @@ const SignUp = () => {
   return (
     <AuthLayout>
       <div>
-        <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">
+        <h2 className="text-3xl font-bold text-gray-100 mb-2 text-center">
           Create Account
         </h2>
-        <p className="text-gray-600 mb-6 text-center">
+        <p className="text-gray-400 mb-6 text-center">
           Sign up to start tracking your expenses
         </p>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg mb-4">
             {error}
           </div>
         )}
@@ -79,11 +79,11 @@ const SignUp = () => {
           </Button>
         </form>
 
-        <p className="text-center text-gray-600 mt-6">
+        <p className="text-center text-gray-400 mt-6">
           Already have an account?{" "}
           <Link
             to="/login"
-            className="text-purple-600 font-semibold hover:text-purple-700"
+            className="text-blue-400 font-semibold hover:text-blue-300"
           >
             Sign In
           </Link>

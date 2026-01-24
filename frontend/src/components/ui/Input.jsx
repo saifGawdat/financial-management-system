@@ -13,8 +13,8 @@ const Input = ({
   return (
     <div className="mb-4">
       {label && (
-        <label className="block text-gray-700 text-sm font-semibold mb-2">
-          {label} {required && <span className="text-red-500">*</span>}
+        <label className="block text-gray-300 text-sm font-medium mb-2">
+          {label} {required && <span className="text-red-400">*</span>}
         </label>
       )}
       <input
@@ -24,7 +24,7 @@ const Input = ({
         onChange={onChange}
         placeholder={placeholder}
         required={required}
-        className={`w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all ${className}`}
+        className={`w-full px-4 py-2.5 bg-white/3 border border-white/6 rounded-lg text-gray-100 placeholder:text-gray-500 focus:outline-none focus:border-blue-500/50 focus:bg-white/5 focus:ring-2 focus:ring-blue-500/20 transition-all duration-150 ${className}`}
       />
     </div>
   );

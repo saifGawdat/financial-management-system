@@ -3,7 +3,7 @@ import { useState } from "react";
 const MonthYearSelector = ({ onSelect, initialMonth, initialYear }) => {
   const currentDate = new Date();
   const [month, setMonth] = useState(
-    initialMonth || currentDate.getMonth() + 1
+    initialMonth || currentDate.getMonth() + 1,
   );
   const [year, setYear] = useState(initialYear || currentDate.getFullYear());
 
@@ -44,30 +44,38 @@ const MonthYearSelector = ({ onSelect, initialMonth, initialYear }) => {
   };
 
   return (
-    <div className="flex gap-3 items-center">
-      <div className="flex flex-col justify-center items-center ">
-        <label className="text-sm font-medium text-gray-700 mb-1">Month</label>
+    <div className="flex gap-4 items-center">
+      <div className="flex flex-col items-start">
+        <label className="text-xs font-medium text-gray-500 mb-1.5 ml-1">
+          Month
+        </label>
         <select
           value={month}
           onChange={handleMonthChange}
-          className="px-1 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 bg-white/3 border border-white/6 rounded-lg text-gray-200 text-sm focus:outline-none focus:border-blue-500/50 focus:bg-white/5 transition-all duration-150 cursor-pointer"
         >
           {months.map((m) => (
-            <option key={m.value} value={m.value}>
+            <option
+              key={m.value}
+              value={m.value}
+              className="bg-[#1a1d24] text-gray-200"
+            >
               {m.label}
             </option>
           ))}
         </select>
       </div>
-      <div className="flex flex-col">
-        <label className="text-sm font-medium text-gray-700 mb-1">Year</label>
+      <div className="flex flex-col items-start">
+        <label className="text-xs font-medium text-gray-500 mb-1.5 ml-1">
+          Year
+        </label>
         <select
           value={year}
           onChange={handleYearChange}
-          className="px-2 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 bg-white/3 border border-white/6 rounded-lg text-gray-200 text-sm focus:outline-none focus:border-blue-500/50 focus:bg-white/5 transition-all duration-150 cursor-pointer"
         >
           {years.map((y) => (
-            <option key={y} value={y}>
+            <option key={y} value={y} className="bg-[#1a1d24] text-gray-200">
               {y}
             </option>
           ))}

@@ -58,30 +58,30 @@ const Settings = () => {
       <div className="max-w-4xl mx-auto">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-100">
             Settings
           </h1>
-          <p className="text-gray-600 mt-1">Manage your account settings</p>
+          <p className="text-gray-400 mt-1">Manage your account settings</p>
         </div>
 
         {/* Danger Zone Section */}
-        <section className="bg-white rounded-2xl shadow-lg p-6 border-2 border-red-200">
+        <section className="bg-[#1a1d24] rounded-2xl shadow-xl p-6 border border-red-500/20">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-red-100 rounded-lg">
-              <IoWarningOutline className="text-red-600" size={24} />
+            <div className="p-2 bg-red-500/10 rounded-lg">
+              <IoWarningOutline className="text-red-500" size={24} />
             </div>
-            <h2 className="text-xl font-semibold text-red-700">Danger Zone</h2>
+            <h2 className="text-xl font-semibold text-red-500">Danger Zone</h2>
           </div>
 
-          <p className="text-gray-600 mb-6">
+          <p className="text-gray-400 mb-6">
             These actions are irreversible. Please proceed with caution.
           </p>
 
-          <div className="p-4 bg-red-50 rounded-xl border border-red-200">
+          <div className="p-4 bg-red-500/5 rounded-xl border border-red-500/10">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <h3 className="font-medium text-gray-900">Delete Account</h3>
-                <p className="text-sm text-gray-600 mt-1">
+                <h3 className="font-medium text-gray-100">Delete Account</h3>
+                <p className="text-sm text-gray-400 mt-1">
                   Permanently delete your account and all associated data. This
                   action cannot be undone.
                 </p>
@@ -107,29 +107,29 @@ const Settings = () => {
         <div className="space-y-4">
           {deleteSuccess ? (
             <div className="text-center py-4">
-              <div className="w-16 h-16 mx-auto mb-4 bg-green-100 rounded-full flex items-center justify-center">
-                <IoCheckmarkCircle className="text-green-600" size={40} />
+              <div className="w-16 h-16 mx-auto mb-4 bg-emerald-500/10 rounded-full flex items-center justify-center">
+                <IoCheckmarkCircle className="text-emerald-500" size={40} />
               </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+              <h3 className="text-xl font-semibold text-gray-100 mb-2">
                 Account Deleted
               </h3>
-              <p className="text-gray-600">
+              <p className="text-gray-400">
                 Your account has been successfully deleted. Redirecting to
                 login...
               </p>
             </div>
           ) : (
             <>
-              <div className="flex items-start gap-3 p-4 bg-red-50 rounded-lg">
+              <div className="flex items-start gap-3 p-4 bg-red-500/10 rounded-xl border border-red-500/20">
                 <IoWarningOutline
-                  className="text-red-600 flex-shrink-0 mt-0.5"
+                  className="text-red-500 shrink-0 mt-0.5"
                   size={24}
                 />
                 <div>
-                  <h3 className="font-semibold text-red-900 mb-1">
+                  <h3 className="font-semibold text-red-400 mb-1">
                     Warning: This action cannot be undone!
                   </h3>
-                  <p className="text-sm text-red-700">
+                  <p className="text-sm text-red-500/80">
                     Deleting your account will permanently remove all your data,
                     including transactions, expenses, and income records.
                   </p>
@@ -139,9 +139,9 @@ const Settings = () => {
               <div className="space-y-2">
                 <label
                   htmlFor="delete-confirm"
-                  className="block text-sm font-medium text-gray-700"
+                  className="block text-sm font-medium text-gray-400"
                 >
-                  Type <span className="font-bold text-red-600">DELETE</span> to
+                  Type <span className="font-bold text-red-500">DELETE</span> to
                   confirm:
                 </label>
                 <input
@@ -153,7 +153,7 @@ const Settings = () => {
                   }
                   placeholder="DELETE"
                   disabled={isDeleting}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent bg-white text-gray-900 placeholder-gray-400 disabled:opacity-50"
+                  className="w-full px-4 py-3 bg-white/3 border border-white/10 rounded-xl text-gray-100 placeholder-gray-600 focus:outline-none focus:border-red-500/50 transition-all disabled:opacity-40"
                 />
               </div>
 
@@ -167,18 +167,18 @@ const Settings = () => {
                 <button
                   onClick={resetDeleteModal}
                   disabled={isDeleting}
-                  className="flex-1 px-4 py-3 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-3 bg-white/5 text-gray-300 rounded-xl hover:bg-white/10 transition-colors font-medium disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleDeleteAccount}
                   disabled={isDeleting || deleteConfirmText !== "DELETE"}
-                  className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl hover:bg-red-700 transition-colors font-medium disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg shadow-red-600/20"
                 >
                   {isDeleting ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       Deleting...
                     </>
                   ) : (

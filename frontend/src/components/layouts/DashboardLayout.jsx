@@ -46,22 +46,22 @@ const DashboardLayout = ({ children }) => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#0f1115]">
       {/* Mobile header */}
-      <div className="lg:hidden bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-30">
+      <div className="lg:hidden bg-[#12141a] border-b border-white/6 p-4 flex justify-between items-center sticky top-0 z-30">
         <button
           onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-700"
+          className="p-1.5 hover:bg-white/5 rounded-lg transition-all duration-150 text-gray-300"
           aria-label={sidebarOpen ? "Close menu" : "Open menu"}
         >
           {sidebarOpen ? (
-            <IoCloseOutline size={28} />
+            <IoCloseOutline size={24} />
           ) : (
-            <IoMenuOutline size={28} />
+            <IoMenuOutline size={24} />
           )}
         </button>
-        <h1 className="text-md font-bold text-purple-600 absolute left-1/2 -translate-x-1/2 text-center ">
-          Financial Management System
+        <h1 className="text-sm font-semibold text-gray-100 absolute left-1/2 -translate-x-1/2 text-center">
+          Financial Management
         </h1>
         <div className="w-10"></div> {/* Spacer to keep title centered */}
       </div>
@@ -70,47 +70,51 @@ const DashboardLayout = ({ children }) => {
         {/* Sidebar */}
         <aside
           className={`
-          fixed lg:static inset-y-0 left-0 z-50 w-72 bg-white shadow-lg transform transition-transform duration-300 ease-in-out h-screen lg:h-auto lg:min-h-screen flex flex-col
+          fixed lg:static inset-y-0 left-0 z-50 w-72 bg-[#12141a] border-r border-white/6 transform transition-transform duration-300 ease-in-out h-screen lg:h-auto lg:min-h-screen flex flex-col
           ${
             sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
           }
         `}
         >
           {/* Header */}
-          <div className="p-6 border-b border-gray-200 flex flex-col justify-center items-center">
+          <div className="p-4 border-b border-white/6 flex flex-col justify-center items-center">
             <div>
-              <h1 className="text-2xl font-bold text-purple-500 text-center">
-                Financial <br/> Management <br/> System
+              <h1 className="text-xl font-bold text-gray-100 text-center">
+                Financial
+                <br />
+                Management
+                <br />
+                System
               </h1>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-xs text-gray-400 mt-2 text-center">
                 Welcome, {user?.name}
               </p>
             </div>
             <button
               onClick={() => setSidebarOpen(false)}
-              className="lg:hidden p-1 hover:bg-gray-100 rounded-lg transition-colors text-gray-500"
+              className="lg:hidden absolute top-4 right-4 p-1.5 hover:bg-white/5 rounded-lg transition-all duration-150 text-gray-400"
               aria-label="Close menu"
             >
-              <IoCloseOutline size={28} />
+              <IoCloseOutline size={24} />
             </button>
           </div>
 
           {/* Navigation - takes up available space */}
           <nav className="flex-1 p-4 overflow-y-auto lg:overflow-visible">
-            <ul className="space-y-2">
+            <ul className="space-y-1">
               {navItems.map((item) => (
                 <li key={item.path}>
                   <Link
                     to={item.path}
                     onClick={() => setSidebarOpen(false)}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 ${
                       location.pathname === item.path
-                        ? "bg-purple-500 text-white shadow-lg"
-                        : "text-gray-700 hover:bg-gray-100"
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-400 hover:bg-white/5 hover:text-gray-200"
                     }`}
                   >
-                    <item.icon size={22} />
-                    <span className="font-medium">{item.label}</span>
+                    <item.icon size={20} />
+                    <span className="font-medium text-sm">{item.label}</span>
                   </Link>
                 </li>
               ))}
@@ -118,13 +122,13 @@ const DashboardLayout = ({ children }) => {
           </nav>
 
           {/* Logout button - stays at bottom */}
-          <div className="p-4 border-t border-gray-200">
+          <div className="p-4 border-t border-white/6">
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 px-4 py-3 w-full text-gray-700 hover:bg-gray-100 rounded-lg transition-all"
+              className="flex items-center gap-3 px-3 py-2.5 w-full text-gray-400 hover:bg-white/5 hover:text-gray-200 rounded-lg transition-all duration-150"
             >
-              <IoLogOutOutline size={22} />
-              <span className="font-medium">Logout</span>
+              <IoLogOutOutline size={20} />
+              <span className="font-medium text-sm">Logout</span>
             </button>
           </div>
         </aside>
@@ -132,13 +136,13 @@ const DashboardLayout = ({ children }) => {
         {/* Overlay for mobile */}
         {sidebarOpen && (
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden animate-in fade-in duration-300"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-30 lg:hidden animate-in fade-in duration-200"
             onClick={() => setSidebarOpen(false)}
           />
         )}
 
         {/* Main content */}
-        <main className="flex-1 p-4 lg:p-16 w-full max-w-full overflow-x-hidden ">
+        <main className="flex-1 p-6 lg:p-8 w-full max-w-full overflow-x-hidden">
           {children}
         </main>
       </div>

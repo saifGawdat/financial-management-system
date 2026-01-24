@@ -9,14 +9,17 @@ const Button = ({
   disabled = false,
 }) => {
   const baseClasses =
-    "px-6 py-3 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
+    "px-4 py-2.5 rounded-lg font-medium transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#0f1115]";
 
   const variants = {
     primary:
-      "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl",
-    secondary: "bg-gray-200 text-gray-800 hover:bg-gray-300",
-    danger: "bg-red-600 text-white hover:bg-red-700",
-    outline: "border-2 border-purple-600 text-purple-600 hover:bg-purple-50",
+      "bg-blue-600 text-white hover:bg-blue-500 focus:ring-blue-500/50 active:bg-blue-700",
+    secondary:
+      "bg-white/[0.05] text-gray-300 hover:bg-white/[0.1] hover:text-gray-100 focus:ring-white/20 border border-white/[0.06]",
+    danger:
+      "bg-red-600 text-white hover:bg-red-500 focus:ring-red-500/50 active:bg-red-700",
+    outline:
+      "border border-blue-600/50 text-blue-400 hover:bg-blue-600/10 hover:border-blue-500 focus:ring-blue-500/50",
   };
 
   return (

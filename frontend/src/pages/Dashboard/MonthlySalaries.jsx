@@ -35,7 +35,7 @@ const MonthlySalaries = () => {
 
   const totalSalaries = employees.reduce(
     (sum, emp) => sum + Number(emp.salary || 0),
-    0
+    0,
   );
 
   const getMonthName = (monthNum) => {
@@ -48,22 +48,22 @@ const MonthlySalaries = () => {
     <DashboardLayout>
       <div className="p-4 md:p-6">
         <div className="mb-8 text-center md:text-left">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-100">
             Monthly Salaries Summary
           </h1>
-          <p className="text-gray-600 mt-1">
+          <p className="text-gray-400 mt-1">
             View total salaries for each month
           </p>
         </div>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl mb-4 text-sm font-medium">
             {error}
           </div>
         )}
 
         {/* Month/Year Selector */}
-        <div className="bg-gray-50 p-4 md:p-6 rounded-2xl shadow-md mb-6 flex md:justify-start border border-gray-100 ">
+        <div className="bg-[#1a1d24] p-4 md:p-6 rounded-2xl border border-white/6 shadow-lg mb-6 flex md:justify-start">
           <MonthYearSelector
             onSelect={handleMonthYearChange}
             initialMonth={month}
@@ -72,50 +72,51 @@ const MonthlySalaries = () => {
         </div>
 
         {/* Total Salaries Card */}
-        <div className="bg-linear-to-r from-blue-600 to-indigo-700 text-white p-6 md:p-8 rounded-3xl shadow-xl mb-6 text-center md:text-left relative overflow-hidden flex flex-col items-center justify-center">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl"></div>
-          <p className="text-lg md:text-xl opacity-90">
+        <div className="bg-[#1a1d24] p-8 md:p-10 rounded-2xl border border-white/6 shadow-xl mb-6 text-center md:text-left relative overflow-hidden flex flex-col items-center justify-center">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full -mr-32 -mt-32 blur-[100px] pointer-events-none"></div>
+          <p className="text-lg md:text-xl text-gray-400 relative z-10 font-medium">
             Total Salaries for {getMonthName(month)} {year}
           </p>
-          <p className="text-3xl md:text-5xl font-bold mt-2">
+          <p className="text-4xl md:text-6xl font-black text-blue-400 mt-2 tracking-tight relative z-10">
             £{totalSalaries.toLocaleString()}
           </p>
-          <p className="text-base md:text-lg opacity-75 mt-1">
+          <div className="mt-4 px-4 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-full text-blue-400 text-sm font-bold uppercase tracking-wider relative z-10">
             {employees.length} Active Employee
             {employees.length !== 1 ? "s" : ""}
-          </p>
+          </div>
         </div>
 
         {/* Employee Salaries Table */}
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="bg-[#1a1d24] rounded-2xl border border-white/6 shadow-xl overflow-hidden">
           {loading ? (
-            <div className="p-8 text-center text-gray-500">
-              Loading employees...
+            <div className="p-12 text-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500 mx-auto mb-4"></div>
+              <p className="text-gray-400 font-medium">Loading employees...</p>
             </div>
           ) : employees.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
+            <div className="p-12 text-center text-gray-500 italic">
               No active employees found
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-white/5 border-b border-white/6 text-center">
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                       Employee Name
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                       Job Title
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                       Monthly Salary
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">
                       Percentage of Total
                     </th>
                   </tr>
                 </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+                <tbody className="divide-y divide-white/6 text-center">
                   {employees.map((employee) => {
                     const percentage =
                       totalSalaries > 0
@@ -123,30 +124,33 @@ const MonthlySalaries = () => {
                         : 0;
 
                     return (
-                      <tr key={employee._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
+                      <tr
+                        key={employee._id}
+                        className="hover:bg-white/5 transition-colors"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-left">
+                          <div className="text-sm font-semibold text-gray-200">
                             {employee.name}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm text-gray-600">
+                        <td className="px-6 py-4 whitespace-nowrap text-left">
+                          <div className="text-sm text-gray-400">
                             {employee.jobTitle}
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-semibold text-blue-600">
+                        <td className="px-6 py-4 whitespace-nowrap text-left">
+                          <div className="text-sm font-bold text-blue-400">
                             £{employee.salary.toLocaleString()}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="text-sm text-gray-600 mr-2">
+                            <div className="text-xs font-bold text-gray-400 mr-3 w-10">
                               {percentage.toFixed(1)}%
                             </div>
-                            <div className="w-24 bg-gray-100 rounded-full h-2 overflow-hidden">
+                            <div className="w-24 bg-white/5 rounded-full h-1.5 overflow-hidden">
                               <div
-                                className="bg-blue-600 h-2 rounded-full"
+                                className="bg-blue-500 h-full rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"
                                 style={{ width: `${percentage}%` }}
                               ></div>
                             </div>
@@ -156,23 +160,18 @@ const MonthlySalaries = () => {
                     );
                   })}
                 </tbody>
-                <tfoot className="bg-gray-50">
+                <tfoot className="bg-white/5 font-bold">
                   <tr>
-                    <td
-                      colSpan="2"
-                      className="px-6 py-4 text-sm font-bold text-gray-900"
-                    >
+                    <td colSpan="2" className="px-6 py-4 text-sm text-gray-200">
                       Total
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-bold text-blue-600">
+                      <div className="text-sm text-blue-400">
                         £{totalSalaries.toLocaleString()}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-bold text-gray-900">
-                        100%
-                      </div>
+                      <div className="text-sm text-gray-200">100%</div>
                     </td>
                   </tr>
                 </tfoot>
@@ -183,22 +182,26 @@ const MonthlySalaries = () => {
 
         {/* Summary Stats */}
         {employees.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-              <p className="text-gray-600 text-sm">Average Salary</p>
-              <p className="text-3xl font-bold text-gray-800 mt-2">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <div className="bg-[#1a1d24] p-6 rounded-2xl border border-white/6 shadow-lg flex flex-col items-center text-center">
+              <p className="text-gray-500 text-sm font-medium">
+                Average Salary
+              </p>
+              <p className="text-3xl font-bold text-gray-100 mt-2">
                 £{Math.round(totalSalaries / employees.length).toLocaleString()}
               </p>
             </div>
-            <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-              <p className="text-gray-600 text-sm">Highest Salary</p>
-              <p className="text-3xl font-bold text-green-600 mt-2">
+            <div className="bg-[#1a1d24] p-6 rounded-2xl border border-white/6 shadow-lg flex flex-col items-center text-center">
+              <p className="text-gray-500 text-sm font-medium">
+                Highest Salary
+              </p>
+              <p className="text-3xl font-bold text-blue-400 mt-2">
                 £{Math.max(...employees.map((e) => e.salary)).toLocaleString()}
               </p>
             </div>
-            <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-100">
-              <p className="text-gray-600 text-sm">Lowest Salary</p>
-              <p className="text-3xl font-bold text-purple-700 mt-2">
+            <div className="bg-[#1a1d24] p-6 rounded-2xl border border-white/6 shadow-lg flex flex-col items-center text-center">
+              <p className="text-gray-500 text-sm font-medium">Lowest Salary</p>
+              <p className="text-3xl font-bold text-gray-300 mt-2">
                 £{Math.min(...employees.map((e) => e.salary)).toLocaleString()}
               </p>
             </div>

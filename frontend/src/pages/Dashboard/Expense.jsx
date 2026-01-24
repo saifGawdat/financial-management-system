@@ -93,7 +93,7 @@ const Expense = () => {
         month,
         year,
         currentPage,
-        itemsPerPage
+        itemsPerPage,
       );
 
       setExpenses(response.data);
@@ -167,7 +167,7 @@ const Expense = () => {
 
   const totalExpense = expenses.reduce(
     (sum, expense) => sum + Number(expense.amount || 0),
-    0
+    0,
   );
 
   const handleCategorySubmit = async (e) => {
@@ -214,7 +214,7 @@ const Expense = () => {
   const totalCategoryExpenses = categories.reduce(
     (sum, cat) =>
       sum + Number(cat.amount || 0) + Number(cat.expensesTotal || 0),
-    0
+    0,
   );
 
   const getCategoryTotal = (categoryName) => {
@@ -225,7 +225,7 @@ const Expense = () => {
     });
     return (grouped[categoryName] || []).reduce(
       (sum, cat) => sum + cat.amount,
-      0
+      0,
     );
   };
 
@@ -236,29 +236,27 @@ const Expense = () => {
       <div>
         <div className="flex flex-col md:flex-row justify-between items-center md:items-center mb-6 gap-6 text-center md:text-left">
           <div className="w-full">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-100">
               Expense Management
             </h1>
             <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 mt-2 justify-center md:justify-start">
-              <p className="text-gray-600">
+              <p className="text-gray-400">
                 {activeTab === "expenses"
                   ? "Total Transactions: "
                   : "Total Category Expenses: "}
                 <span
                   className={`${
-                    activeTab === "expenses"
-                      ? "text-red-600"
-                      : "text-purple-600"
+                    activeTab === "expenses" ? "text-red-400" : "text-blue-400"
                   } font-bold text-xl`}
                 >
                   {formatCurrency(
                     activeTab === "expenses"
                       ? totalExpense
-                      : totalCategoryExpenses
+                      : totalCategoryExpenses,
                   )}
                 </span>
               </p>
-              <div className="hidden md:block h-6 w-px bg-gray-300 mx-2 "></div>
+              <div className="hidden md:block h-6 w-px bg-white/10 mx-2 "></div>
               <MonthYearSelector
                 onSelect={(m, y) => {
                   setMonth(m);
@@ -291,7 +289,7 @@ const Expense = () => {
             ) : (
               <Button
                 onClick={() => setShowCategoryModal(true)}
-                className="flex items-center justify-center gap-2 w-full sm:w-auto bg-purple-600 hover:bg-purple-700"
+                className="flex items-center justify-center gap-2 w-full sm:w-auto bg-blue-600 hover:bg-blue-500"
               >
                 <IoAddCircleOutline size={20} />
                 Add Category Spend
@@ -301,13 +299,13 @@ const Expense = () => {
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex p-1 bg-gray-100 rounded-xl mb-6 w-full md:w-fit">
+        <div className="flex p-1 bg-white/3 border border-white/6 rounded-xl mb-6 w-full md:w-fit">
           <button
             onClick={() => setActiveTab("expenses")}
-            className={`flex-1 md:flex-none px-6 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all ${
+            className={`flex-1 md:flex-none px-6 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 ${
               activeTab === "expenses"
-                ? "bg-white text-purple-600 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-blue-600 text-white shadow-lg"
+                : "text-gray-400 hover:text-gray-200 hover:bg-white/5"
             }`}
           >
             <IoListOutline size={18} />
@@ -315,10 +313,10 @@ const Expense = () => {
           </button>
           <button
             onClick={() => setActiveTab("categories")}
-            className={`flex-1 md:flex-none px-6 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all ${
+            className={`flex-1 md:flex-none px-6 py-2 rounded-lg font-semibold flex items-center justify-center gap-2 transition-all duration-200 ${
               activeTab === "categories"
-                ? "bg-white text-purple-600 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
+                ? "bg-blue-600 text-white shadow-lg"
+                : "text-gray-400 hover:text-gray-200 hover:bg-white/5"
             }`}
           >
             <IoGridOutline size={18} />
@@ -335,15 +333,15 @@ const Expense = () => {
             />
             {/* أدوات التحكم في الترقيم - Pagination Controls */}
             {!loading && expenses.length > 0 && (
-              <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+              <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/2 p-4 rounded-xl border border-white/6">
                 {/* معلومات الصفحة - Page Info */}
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-gray-400">
                   <span className="font-medium">Showing</span>{" "}
-                  <span className="font-bold text-red-600">
+                  <span className="font-bold text-red-400">
                     {expenses.length}
                   </span>{" "}
                   <span className="font-medium">of</span>{" "}
-                  <span className="font-bold text-red-600">{totalItems}</span>{" "}
+                  <span className="font-bold text-red-400">{totalItems}</span>{" "}
                   <span className="font-medium">transactions</span>
                 </div>
 
@@ -354,13 +352,13 @@ const Expense = () => {
                       setCurrentPage((prev) => Math.max(1, prev - 1))
                     }
                     disabled={currentPage === 1 || paginationLoading}
-                    className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="px-4 py-2 bg-white/3 border border-white/6 text-gray-300 rounded-xl font-medium transition-all hover:bg-white/6 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
                   >
                     <span>←</span>
                     <span className="hidden sm:inline">Previous</span>
                   </button>
 
-                  <div className="px-4 py-2 bg-red-50 border border-red-100 text-red-700 rounded-xl font-bold min-w-[100px] text-center">
+                  <div className="px-4 py-2 bg-blue-600/10 border border-blue-500/20 text-blue-400 rounded-xl font-bold min-w-[100px] text-center">
                     {paginationLoading ? (
                       <span className="text-xs">Loading...</span>
                     ) : (
@@ -375,7 +373,7 @@ const Expense = () => {
                       setCurrentPage((prev) => Math.min(totalPages, prev + 1))
                     }
                     disabled={currentPage >= totalPages || paginationLoading}
-                    className="px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium transition-all hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    className="px-4 py-2 bg-white/3 border border-white/6 text-gray-300 rounded-xl font-medium transition-all hover:bg-white/6 disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
                   >
                     <span className="hidden sm:inline">Next</span>
                     <span>→</span>
@@ -395,38 +393,38 @@ const Expense = () => {
                 return (
                   <div
                     key={cat._id || cat.category}
-                    className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-all"
+                    className="bg-[#1a1d24] rounded-2xl overflow-hidden border border-white/6 hover:border-white/10 transition-all duration-150 shadow-lg"
                   >
-                    <div className="bg-gray-800 text-white p-4">
+                    <div className="bg-[#1f2229] border-b border-white/6 p-4">
                       <div className="flex justify-between items-center">
-                        <h3 className="text-lg font-semibold">
+                        <h3 className="text-lg font-semibold text-gray-100">
                           {cat.category}
                         </h3>
                         {cat.isVirtual && (
-                          <span className="text-[10px] bg-purple-500/20 text-purple-200 px-2 py-1 rounded-full uppercase tracking-wider font-bold">
+                          <span className="text-[10px] bg-blue-500/10 text-blue-400 px-2 py-1 rounded-full uppercase tracking-wider font-bold">
                             Transactions Only
                           </span>
                         )}
                       </div>
-                      <p className="text-2xl font-bold mt-1">
+                      <p className="text-2xl font-bold mt-1 text-gray-100">
                         {formatCurrency(total)}
                       </p>
                     </div>
                     <div className="p-4">
                       <div className="space-y-2 max-h-64 overflow-y-auto custom-scrollbar">
                         {hasBucket && cat.amount > 0 && (
-                          <div className="flex justify-between items-center p-3 bg-purple-50 rounded-xl border border-purple-100">
+                          <div className="flex justify-between items-center p-3 bg-blue-500/5 rounded-xl border border-blue-500/10">
                             <div>
-                              <p className="font-bold text-purple-900">
+                              <p className="font-bold text-blue-400">
                                 {formatCurrency(cat.amount)}
                               </p>
-                              <p className="text-[10px] text-purple-600 font-medium uppercase">
+                              <p className="text-[10px] text-blue-500/60 font-medium uppercase">
                                 Monthly Bucket
                               </p>
                             </div>
                             <button
                               onClick={() => handleDeleteCategory(cat._id)}
-                              className="p-2 text-gray-400 hover:text-red-600 hover:bg-white rounded-lg transition-all"
+                              className="p-2 text-gray-500 hover:text-red-400 hover:bg-white/5 rounded-lg transition-all"
                             >
                               <IoTrashOutline size={18} />
                             </button>
@@ -436,22 +434,22 @@ const Expense = () => {
                         {actualExpenses.map((expense) => (
                           <div
                             key={expense._id}
-                            className="flex justify-between items-center p-3 bg-gray-50 rounded-xl border border-gray-100"
+                            className="flex justify-between items-center p-3 bg-white/2 rounded-xl border border-white/6"
                           >
                             <div className="flex-1 min-w-0">
-                              <p className="font-bold text-gray-800 truncate">
+                              <p className="font-bold text-gray-200 truncate">
                                 {formatCurrency(expense.amount)}
                               </p>
-                              <p className="text-[10px] text-purple-600 font-semibold truncate">
+                              <p className="text-[10px] text-blue-400 font-semibold truncate">
                                 {expense.title}
                               </p>
                               {expense.description && (
-                                <p className="text-[10px] text-gray-400 truncate mt-0.5">
+                                <p className="text-[10px] text-gray-500 truncate mt-0.5">
                                   {expense.description}
                                 </p>
                               )}
                             </div>
-                            <span className="text-[10px] text-gray-400 font-medium whitespace-nowrap ml-2">
+                            <span className="text-[10px] text-gray-500 font-medium whitespace-nowrap ml-2">
                               {new Date(expense.date).toLocaleDateString()}
                             </span>
                           </div>
@@ -472,19 +470,19 @@ const Expense = () => {
             {/* Breakdown Chart */}
             {totalCategoryExpenses === 0 && (
               <Card className="p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                  <IoGridOutline className="text-purple-600" />
+                <h3 className="text-xl font-bold text-gray-100 mb-6 flex items-center gap-2">
+                  <IoGridOutline className="text-blue-500" />
                   Category Breakdown
                 </h3>
-                <p className="text-gray-400 text-center py-6 text-sm italic">
+                <p className="text-gray-500 text-center py-6 text-sm italic">
                   No spend recorded
                 </p>
               </Card>
             )}
             {totalCategoryExpenses > 0 && (
               <Card className="p-6">
-                <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-                  <IoGridOutline className="text-purple-600" />
+                <h3 className="text-xl font-bold text-gray-100 mb-6 flex items-center gap-2">
+                  <IoGridOutline className="text-blue-500" />
                   Category Breakdown
                 </h3>
                 <div className="space-y-4">
@@ -498,19 +496,19 @@ const Expense = () => {
                     return (
                       <div key={categoryName}>
                         <div className="flex justify-between mb-2 items-end">
-                          <span className="text-gray-700 font-semibold">
+                          <span className="text-gray-300 font-semibold">
                             {categoryName}
                           </span>
-                          <span className="text-sm font-bold text-gray-800">
+                          <span className="text-sm font-bold text-gray-100">
                             {formatCurrency(total)}{" "}
-                            <span className="text-gray-400 font-medium ml-1">
+                            <span className="text-gray-500 font-medium ml-1">
                               ({percentage.toFixed(1)}%)
                             </span>
                           </span>
                         </div>
-                        <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                        <div className="w-full bg-white/5 rounded-full h-2 overflow-hidden">
                           <div
-                            className="bg-purple-600 h-full rounded-full transition-all duration-500 ease-out"
+                            className="bg-blue-600 h-full rounded-full transition-all duration-500 ease-out shadow-[0_0_8px_rgba(59,130,246,0.3)]"
                             style={{ width: `${percentage}%` }}
                           ></div>
                         </div>
@@ -552,15 +550,15 @@ const Expense = () => {
               required
             />
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-semibold mb-2">
-                Category <span className="text-red-500">*</span>
+              <label className="block text-gray-300 text-sm font-semibold mb-2">
+                Category <span className="text-red-400">*</span>
               </label>
               <select
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-2.5 bg-white/3 border border-white/6 rounded-lg text-gray-100 focus:outline-none focus:border-blue-500/50 focus:bg-white/5 focus:ring-2 focus:ring-blue-500/20 transition-all duration-150"
               >
                 <option value="Other">Other</option>
                 {Array.isArray(userCategories) &&
@@ -582,7 +580,7 @@ const Expense = () => {
               required
             />
             <div className="mb-4">
-              <label className="block text-gray-700 text-sm font-semibold mb-2">
+              <label className="block text-gray-300 text-sm font-semibold mb-2">
                 Description (Optional)
               </label>
               <textarea
@@ -590,7 +588,7 @@ const Expense = () => {
                 value={formData.description}
                 onChange={handleChange}
                 placeholder="Add notes..."
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-2.5 bg-white/3 border border-white/6 rounded-lg text-gray-100 focus:outline-none focus:border-blue-500/50 focus:bg-white/5 focus:ring-2 focus:ring-blue-500/20 transition-all duration-150"
                 rows="3"
               />
             </div>
@@ -608,8 +606,8 @@ const Expense = () => {
         >
           <form onSubmit={handleCategorySubmit}>
             <div className="mb-4">
-              <label className="block text-gray-700 font-semibold mb-2">
-                Category <span className="text-red-500">*</span>
+              <label className="block text-gray-300 font-semibold mb-2">
+                Category <span className="text-red-400">*</span>
               </label>
               <input
                 type="text"
@@ -621,7 +619,7 @@ const Expense = () => {
                     category: e.target.value,
                   })
                 }
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-2.5 bg-white/3 border border-white/6 rounded-lg text-gray-100 focus:outline-none focus:border-blue-500/50 focus:bg-white/5 focus:ring-2 focus:ring-blue-500/20 transition-all duration-150"
                 placeholder="e.g., Transportation, Repair, Equipment"
                 required
               />
@@ -645,7 +643,7 @@ const Expense = () => {
               required
             />
             <div className="mb-6">
-              <label className="block text-gray-700 text-sm font-semibold mb-2">
+              <label className="block text-gray-300 text-sm font-semibold mb-2">
                 Description (Optional)
               </label>
               <textarea
@@ -656,7 +654,7 @@ const Expense = () => {
                     description: e.target.value,
                   })
                 }
-                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-2.5 bg-white/3 border border-white/6 rounded-lg text-gray-100 focus:outline-none focus:border-blue-500/50 focus:bg-white/5 focus:ring-2 focus:ring-blue-500/20 transition-all duration-150"
                 rows="3"
                 placeholder="Optional notes..."
               />

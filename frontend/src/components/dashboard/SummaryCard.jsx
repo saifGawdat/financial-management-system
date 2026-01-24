@@ -1,21 +1,50 @@
 import React from "react";
 import { formatCurrency } from "../../utils/formatters";
 
-const SummaryCard = ({ title, amount, icon: Icon, iconColor, bgGradient }) => {
+const SummaryCard = ({
+  title,
+  amount,
+  icon: Icon,
+  iconColor,
+  bgGradient,
+  highlight = false, 
+}) => {
+  const borderColorMap = {
+    "from-purple-500 to-purple-500": "border-l-blue-500",
+    "from-green-500 to-green-600": "border-l-green-500",
+    "from-red-500 to-red-600": "border-l-red-500",
+  };
+
+  const iconBgMap = {
+    "from-purple-500 to-purple-500": "bg-blue-500/10",
+    "from-green-500 to-green-600": "bg-green-500/10",
+    "from-red-500 to-red-600": "bg-red-500/10",
+  };
+
+  const borderColor = highlight
+    ? "border-l-gray-300"
+    : borderColorMap[bgGradient] || "border-l-blue-500";
+
+  const iconBg = highlight
+    ? "bg-white/10"
+    : iconBgMap[bgGradient] || "bg-blue-500/10";
+
   return (
     <div
-      className={`bg-linear-to-br ${bgGradient} rounded-3xl shadow-2xl p-8 text-white transform hover:scale-105 transition-all duration-300 relative overflow-hidden group w-full`}
+      className={`bg-[#1a1d24] border border-white/6 ${borderColor} border-l-4 rounded-xl p-6 transition-all duration-200 hover:border-white/10 w-full`}
     >
-      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl group-hover:scale-110 transition-transform duration-500"></div>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-white text-opacity-90 text-sm font-medium mb-1">
-            {title}
-          </p>
-          <h3 className="text-2xl font-bold">{formatCurrency(amount)}</h3>
+          <p className="text-gray-400 text-sm font-medium mb-1">{title}</p>
+          <h3 className="text-2xl font-bold text-gray-100">
+            {formatCurrency(amount)}
+          </h3>
         </div>
-        <div className={`${iconColor} bg-white bg-opacity-20 p-4 rounded-full`}>
-          <Icon size={32} />
+
+        <div
+          className={`${iconBg} p-3 rounded-lg flex items-center justify-center`}
+        >
+          <Icon size={24} className={highlight ? "text-white" : iconColor} />
         </div>
       </div>
     </div>

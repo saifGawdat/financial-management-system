@@ -1,57 +1,127 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap");
 @import "tailwindcss";
 
-/* Theme CSS Variables */
+/* Premium Dark-Mode Design System */
 :root {
-  /* Background colors */
-  --color-bg-primary: #0077b6;
-  --color-bg-secondary: #ffffff;
-  --color-bg-tertiary: #f3f4f6;
-  --color-bg-hover: #f9fafb;
+  /* Backgrounds - Dark charcoal palette */
+  --color-bg-primary: #0f1115;
+  --color-bg-secondary: #12141a;
+  --color-bg-tertiary: #1a1d24;
+  --color-bg-elevated: #1f2229;
+  --color-bg-hover: rgba(255, 255, 255, 0.03);
 
-  /* Text colors */
-  --color-text-primary: #1f2937;
-  --color-text-secondary: #4b5563;
-  --color-text-muted: #9ca3af;
+  /* Text colors - High contrast for dark mode */
+  --color-text-primary: #e5e7eb;
+  --color-text-secondary: #9ca3af;
+  --color-text-muted: #6b7280;
+  --color-text-disabled: #4b5563;
 
-  /* Border colors */
-  --color-border: #e5e7eb;
-  --color-border-hover: #d1d5db;
+  /* Border colors - Subtle white opacity */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-medium: rgba(255, 255, 255, 0.1);
+  --border-focus: rgba(59, 130, 246, 0.5);
 
-  /* Accent colors (remain consistent) */
-  --color-accent-purple: #0077b6;
-  --color-accent-green: #22c55e;
+  /* Accent colors - Premium blue primary */
+  --color-accent-blue: #3b82f6;
+  --color-accent-blue-hover: #60a5fa;
+  --color-accent-green: #10b981;
   --color-accent-red: #ef4444;
+  --color-accent-yellow: #f59e0b;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  /* Shadows - Dark mode appropriate */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6);
+
+  /* Spacing scale - Consistent 8px base */
+  --spacing-1: 0.25rem; /* 4px */
+  --spacing-2: 0.5rem; /* 8px */
+  --spacing-3: 0.75rem; /* 12px */
+  --spacing-4: 1rem; /* 16px */
+  --spacing-6: 1.5rem; /* 24px */
+  --spacing-8: 2rem; /* 32px */
+  --spacing-12: 3rem; /* 48px */
+  --spacing-16: 4rem; /* 64px */
+
+  /* Border radius */
+  --radius-sm: 0.375rem; /* 6px */
+  --radius-md: 0.5rem; /* 8px */
+  --radius-lg: 0.75rem; /* 12px */
+  --radius-xl: 1rem; /* 16px */
+
+  /* Transitions */
+  --transition-fast: 150ms;
+  --transition-medium: 200ms;
+  --transition-slow: 250ms;
 }
 
 @theme {
-  --font-display: "Outfit", serif;
-  --font-body: "Outfit", serif;
-  --font-heading: "Outfit", serif;
-  --font-button: "Outfit", serif;
-  --font-caption: "Outfit", serif;
-  --font-label: "Outfit", serif;
-  --font-legend: "Outfit", serif;
-  --font-menu: "Outfit", serif;
-  --font-message: "Outfit", serif;
-  --font-placeholder: "Outfit", serif;
-  --font-small-caption: "Outfit", serif;
-  --font-subhead: "Outfit", serif;
-  --font-title: "outfit ", serif;
+  --font-display: "Outfit", sans-serif;
+  --font-body: "Outfit", sans-serif;
+  --font-heading: "Outfit", sans-serif;
+  --font-button: "Outfit", sans-serif;
+  --font-caption: "Outfit", sans-serif;
+  --font-label: "Outfit", sans-serif;
+  --font-legend: "Outfit", sans-serif;
+  --font-menu: "Outfit", sans-serif;
+  --font-message: "Outfit", sans-serif;
+  --font-placeholder: "Outfit", sans-serif;
+  --font-small-caption: "Outfit", sans-serif;
+  --font-subhead: "Outfit", sans-serif;
+  --font-title: "Outfit", sans-serif;
+
+  /* Define the 'border' color so 'border-border' utility works */
+  --color-border: rgba(255, 255, 255, 0.06);
 }
 
 @layer base {
-  body {
-    background-color: #0077b6;
-    overflow-x: hidden;
+  * {
+    @apply border-border;
   }
+
   html {
     scroll-behavior: smooth;
     font-family: var(--font-display);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    overflow-x: hidden;
+    min-height: 100vh;
+  }
+
+  /* Custom scrollbar for dark mode */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg-secondary);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-bg-elevated);
+    border-radius: var(--radius-md);
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2a2e36;
+  }
+
+  /* Selection styling */
+  ::selection {
+    background-color: rgba(59, 130, 246, 0.3);
+    color: var(--color-text-primary);
+  }
+
+  /* Focus visible for accessibility */
+  *:focus-visible {
+    outline: 2px solid var(--color-accent-blue);
+    outline-offset: 2px;
   }
 }
