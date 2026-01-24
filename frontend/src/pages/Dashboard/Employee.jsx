@@ -328,7 +328,7 @@ const Employee = () => {
               className="flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               <span>
-                <IoBarChartOutline  size={20}/>
+                <IoBarChartOutline size={20} />
               </span>{" "}
               Monthly Adjustments
             </Button>
@@ -671,7 +671,7 @@ const Employee = () => {
                   <select
                     value={selectedMonth}
                     onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-200 focus:outline-none focus:border-blue-500/50"
+                    className="bg-[#1a1d24] border border-white/10 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-200 focus:outline-none focus:border-blue-500/50 cursor-pointer"
                   >
                     {months.map((m, i) => (
                       <option
@@ -686,7 +686,7 @@ const Employee = () => {
                   <select
                     value={selectedYear}
                     onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-                    className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-200 focus:outline-none focus:border-blue-500/50"
+                    className="bg-[#1a1d24] border border-white/10 rounded-lg px-3 py-1.5 text-sm font-medium text-gray-200 focus:outline-none focus:border-blue-500/50 cursor-pointer"
                   >
                     {[2024, 2025, 2026].map((y) => (
                       <option key={y} value={y} className="bg-[#1a1d24]">
@@ -808,7 +808,7 @@ const Employee = () => {
                           Employee
                         </label>
                         <select
-                          className="w-full bg-white/3 border border-white/10 rounded-xl p-3 text-sm text-gray-200 focus:outline-none focus:border-blue-500/50 appearance-none"
+                          className="w-full bg-[#1a1d24] border border-white/10 rounded-xl p-3 text-sm text-gray-200 focus:outline-none focus:border-blue-500/50 cursor-pointer"
                           value={adjustmentFormData.employeeId}
                           onChange={(e) =>
                             setAdjustmentFormData({
@@ -838,7 +838,7 @@ const Employee = () => {
                             Type
                           </label>
                           <select
-                            className="w-full bg-white/3 border border-white/10 rounded-xl p-3 text-sm text-gray-200 focus:outline-none focus:border-blue-500/50"
+                            className="w-full bg-[#1a1d24] border border-white/10 rounded-xl p-3 text-sm text-gray-200 focus:outline-none focus:border-blue-500/50 cursor-pointer"
                             value={adjustmentFormData.type}
                             onChange={(e) =>
                               setAdjustmentFormData({

@@ -558,14 +558,20 @@ const Expense = () => {
                 value={formData.category}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-2.5 bg-white/3 border border-white/6 rounded-lg text-gray-100 focus:outline-none focus:border-blue-500/50 focus:bg-white/5 focus:ring-2 focus:ring-blue-500/20 transition-all duration-150"
+                className="w-full px-4 py-2.5 bg-[#1a1d24] border border-white/10 rounded-lg text-gray-100 focus:outline-none focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 transition-all duration-150 cursor-pointer"
               >
-                <option value="Other">Other</option>
+                <option value="Other" className="bg-[#1a1d24] text-gray-100">
+                  Other
+                </option>
                 {Array.isArray(userCategories) &&
                   userCategories
                     .filter((cat) => cat && cat !== "Other")
                     .map((cat) => (
-                      <option key={cat} value={cat}>
+                      <option
+                        key={cat}
+                        value={cat}
+                        className="bg-[#1a1d24] text-gray-100"
+                      >
                         {cat}
                       </option>
                     ))}

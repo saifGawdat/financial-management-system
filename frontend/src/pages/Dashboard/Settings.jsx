@@ -7,6 +7,7 @@ import {
   IoTrashOutline,
   IoWarningOutline,
   IoCheckmarkCircle,
+  IoDownloadOutline,
 } from "react-icons/io5";
 
 const Settings = () => {
@@ -53,6 +54,57 @@ const Settings = () => {
     setDeleteSuccess(false);
   };
 
+  // install app state
+  const [showInstallModal, setShowInstallModal] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [isStandalone, setIsStandalone] = useState(false);
+
+  React.useEffect(() => {
+    // Check if app is already running in standalone mode
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+      setIsStandalone(true);
+    }
+
+    const handleBeforeInstallPrompt = (e) => {
+      // Prevent browser from showing its own prompt
+      e.preventDefault();
+      // Store the event so it can be triggered later
+      setDeferredPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setIsStandalone(true);
+      setDeferredPrompt(null);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt,
+      );
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
+
+  const installApp = async () => {
+    if (!deferredPrompt) {
+      // If prompt isn't available, the user might need to use browser menu
+      alert("Please use your browser's menu (Add to home screen) to install.");
+      setShowInstallModal(false);
+      return;
+    }
+
+    setShowInstallModal(false);
+    deferredPrompt.prompt();
+
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`User response to the install prompt: ${outcome}`);
+
+    setDeferredPrompt(null);
+  };
   return (
     <DashboardLayout>
       <div className="max-w-4xl mx-auto">
@@ -96,7 +148,56 @@ const Settings = () => {
             </div>
           </div>
         </section>
+        {!isStandalone && (
+          <section className="mt-5 bg-[#1a1d24] rounded-2xl shadow-xl p-6 border border-blue-500/20 flex flex-col gap-2 md:flex-row items-center justify-between">
+            <div className="flex flex-col gap-2">
+              <p className="text-gray-300 text-2xl font-semibold">
+                Install the app
+              </p>
+              <p className="text-gray-400 mt-1">
+                Install the app on your device to access it offline.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-3 mt-4">
+              <button
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium whitespace-nowrap"
+                onClick={() => setShowInstallModal(true)}
+              >
+                <IoDownloadOutline size={18} />
+                Download App
+              </button>
+            </div>
+          </section>
+        )}
       </div>
+      {showInstallModal && (
+        <Modal
+          isOpen={showInstallModal}
+          onClose={() => setShowInstallModal(false)}
+          title="Install App"
+        >
+          <div className="space-y-4">
+            <p className="text-gray-400">
+              Are you sure you want to install the app?
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium whitespace-nowrap px-4 py-2"
+                onClick={installApp}
+              >
+                Install
+              </button>
+              <button
+                className="bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors font-medium whitespace-nowrap px-4 py-2"
+                onClick={() => setShowInstallModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </Modal>
+      )}
 
       {/* Delete Account Confirmation Modal */}
       <Modal

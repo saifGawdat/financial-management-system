@@ -30,9 +30,12 @@ A robust, enterprise-grade financial management solution built with the MERN sta
 - **Salary Tracking**: Dedicated system for tracking monthly salaries and transaction history.
 - **Financial History**: Detailed log of all employee-related payouts.
 
-### 📥 Enterprise Data Portability
+### � Progressive Web App (PWA)
 
-- **Excel Export**: Integrated utility using `xlsx` to generate professional financial reports with a single click.
+- **Native Experience**: Installable on both mobile and desktop for a native-like app feel.
+- **Offline Access**: Access the dashboard and view cached data even without an active internet connection.
+- **Premium Iconography**: Custom-designed 512x512 app icon for high-density displays.
+- **One-Click Install**: Strategic installation logic integrated into the Settings dashboard.
 
 ### 🔐 Security & Architecture
 
@@ -48,6 +51,7 @@ A robust, enterprise-grade financial management solution built with the MERN sta
 
 - **Framework:** React 19 (Vite)
 - **Styling:** Tailwind CSS
+- **PWA:** Vite-PWA Integration
 - **Charts:** Recharts
 - **Data Export:** XLSX Library
 - **Authentication:** JWT-Decode, Axios
@@ -143,7 +147,7 @@ expense-tracker/
 
 - [ ] **Multi-currency Support**: Handle various international currencies with real-time exchange rates.
 - [ ] **AI Financial Insights**: Predictive analysis for expense forecasting.
-- [ ] **PWA Integration**: Transform into a Progressive Web App for offline mobile usage.
+- [x] **PWA Integration**: Transform into a Progressive Web App for offline mobile usage.
 - [ ] **Advanced Invoicing**: Generate and email PDFs directly to customers.
 
 ---

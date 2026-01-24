@@ -164,11 +164,11 @@ const Income = () => {
               {/* معلومات الصفحة - Page Info */}
               <div className="text-sm text-gray-400">
                 <span className="font-medium">Showing</span>{" "}
-                <span className="font-bold text-green-400">
+                <span className="font-bold text-blue-400">
                   {incomes.length}
                 </span>{" "}
                 <span className="font-medium">of</span>{" "}
-                <span className="font-bold text-green-400">{totalItems}</span>{" "}
+                <span className="font-bold text-blue-400">{totalItems}</span>{" "}
                 <span className="font-medium">transactions</span>
               </div>
 

@@ -219,7 +219,7 @@ const Customers = () => {
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-              className="px-4 py-2 bg-white/3 border border-white/10 rounded-xl text-gray-200 shadow-sm focus:outline-none focus:border-blue-500/50 transition-all flex-1 sm:flex-none appearance-none"
+              className="px-4 py-2 bg-[#1a1d24] border border-white/10 rounded-xl text-gray-200 shadow-sm focus:outline-none focus:border-blue-500/50 transition-all flex-1 sm:flex-none appearance-none cursor-pointer"
             >
               {months.map((m, i) => (
                 <option key={m} value={i + 1} className="bg-[#1a1d24]">
@@ -232,7 +232,7 @@ const Customers = () => {
             <select
               value={selectedYear}
               onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              className="px-4 py-2 bg-white/3 border border-white/10 rounded-xl text-gray-200 shadow-sm focus:outline-none focus:border-blue-500/50 transition-all flex-1 sm:flex-none appearance-none"
+              className="px-4 py-2 bg-[#1a1d24] border border-white/10 rounded-xl text-gray-200 shadow-sm focus:outline-none focus:border-blue-500/50 transition-all flex-1 sm:flex-none appearance-none cursor-pointer"
             >
               {years.map((y) => (
                 <option key={y} value={y} className="bg-[#1a1d24]">
