@@ -58,6 +58,10 @@ const Income = () => {
 
   useEffect(() => {
     fetchIncomes();
+
+    // Listen for AI-triggered refreshes
+    window.addEventListener("refreshData", fetchIncomes);
+    return () => window.removeEventListener("refreshData", fetchIncomes);
   }, [fetchIncomes]);
 
   const handleChange = (e) => {

@@ -16,6 +16,7 @@ import MonthlySalaries from "./pages/Dashboard/MonthlySalaries";
 import ProfitSummary from "./pages/Dashboard/ProfitSummary";
 import Customers from "./pages/Dashboard/Customers";
 import Settings from "./pages/Dashboard/Settings";
+import AIAssistant from "./components/AIAssistant/AIAssistant";
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -104,6 +105,7 @@ function App() {
           }
         />{" "}
       </Routes>
+      <AIAssistant />
     </Router>
   );
 }
