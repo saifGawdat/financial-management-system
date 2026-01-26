@@ -65,8 +65,15 @@ const Home = () => {
 
     loadData();
 
+    // Listen for AI-triggered refreshes
+    const handleRefresh = () => {
+      if (isMounted) fetchDashboardData();
+    };
+    window.addEventListener("refreshData", handleRefresh);
+
     return () => {
       isMounted = false;
+      window.removeEventListener("refreshData", handleRefresh);
     };
   }, [fetchDashboardData]);
 
@@ -115,7 +122,7 @@ const Home = () => {
           icon={IoWalletOutline}
           iconColor="text-white-500"
           bgGradient="white"
-          highlight= "true"
+          highlight="true"
         />
         <SummaryCard
           title="Total Income"
