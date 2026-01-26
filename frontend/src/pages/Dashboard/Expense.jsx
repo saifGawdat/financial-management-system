@@ -109,12 +109,20 @@ const Expense = () => {
   }, [month, year, currentPage, itemsPerPage]);
 
   useEffect(() => {
-    if (activeTab === "categories") {
-      fetchCategories();
-    } else {
-      fetchUserCategories();
-      fetchExpenses();
-    }
+    const refreshData = () => {
+      if (activeTab === "categories") {
+        fetchCategories();
+      } else {
+        fetchUserCategories();
+        fetchExpenses();
+      }
+    };
+
+    refreshData();
+
+    // Listen for AI-triggered refreshes
+    window.addEventListener("refreshData", refreshData);
+    return () => window.removeEventListener("refreshData", refreshData);
   }, [activeTab, fetchCategories, fetchUserCategories, fetchExpenses]);
 
   const handleChange = (e) => {
