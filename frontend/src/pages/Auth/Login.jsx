@@ -4,11 +4,12 @@ import AuthLayout from "../../components/layouts/AuthLayout";
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import { useAuth } from "../../context/AuthContext";
+import { GoogleLogin } from "@react-oauth/google";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -23,6 +24,15 @@ const Login = () => {
       navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.error || "Login failed");
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      await googleLogin(credentialResponse.credential);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.response?.data?.error || "Google login failed");
     }
   };
 
@@ -65,6 +75,29 @@ const Login = () => {
             Sign In
           </Button>
         </form>
+
+        <div className="relative my-6">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-700"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-gray-900 text-gray-400">
+              Or continue with
+            </span>
+          </div>
+        </div>
+
+        <div className="flex justify-center mt-2">
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={() => setError("Google Login Failed")}
+            theme="filled_blue"
+            shape="pill"
+            size="large"
+            text="signin_with"
+            width="340"
+          />
+        </div>
 
         <p className="text-center text-gray-400 mt-6">
           Don't have an account?{" "}
