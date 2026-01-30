@@ -6,11 +6,7 @@ const router = Router();
 const dashboardController = new DashboardController();
 
 router.get("/stats", auth, dashboardController.getStats);
-router.get("/charts", auth, dashboardController.getChartData);
-router.get(
-  "/recent-transactions",
-  auth,
-  dashboardController.getRecentTransactions,
-);
+router.get("/chart-data", auth, dashboardController.getChartData);
+router.get("/recent", auth, dashboardController.getRecentTransactions);
 
 export default router;

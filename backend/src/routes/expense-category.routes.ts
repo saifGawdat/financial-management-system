@@ -7,7 +7,7 @@ const expenseCategoryController = new ExpenseCategoryController();
 
 router.get("/", auth, expenseCategoryController.getExpenseCategories);
 router.get(
-  "/breakdown/:month/:year",
+  "/monthly/:month/:year",
   auth,
   expenseCategoryController.getMonthlyExpenseBreakdown,
 );

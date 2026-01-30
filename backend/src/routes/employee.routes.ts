@@ -12,12 +12,12 @@ router.post("/", auth, employeeController.createEmployee);
 router.put("/:id", auth, employeeController.updateEmployee);
 router.delete("/:id", auth, employeeController.deleteEmployee);
 
-router.post("/transactions", auth, employeeController.addTransaction);
+router.post("/transaction", auth, employeeController.addTransaction);
 router.get(
-  "/transactions/:month/:year",
+  "/transaction/:month/:year",
   auth,
   employeeController.getTransactionsByMonth,
 );
-router.delete("/transactions/:id", auth, employeeController.deleteTransaction);
+router.delete("/transaction/:id", auth, employeeController.deleteTransaction);
 
 export default router;

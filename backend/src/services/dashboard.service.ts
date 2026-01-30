@@ -14,25 +14,21 @@ export class DashboardService {
       query.date = { $gte: startDate, $lte: endDate };
     }
 
-    const incomes = await Income.find(query);
-    const expenses = await Expense.find(query);
+    const [incomes, expenses] = await Promise.all([
+      Income.find(query),
+      Expense.find(query),
+    ]);
 
     let totalExpense = expenses.reduce((sum, exp) => sum + exp.amount, 0);
 
     if (month && year) {
-      const categories = await ExpenseCategory.find({
-        user: userId,
-        month,
-        year,
-      });
-      totalExpense += categories.reduce((sum, cat) => sum + cat.amount, 0);
+      const [categories, employees, transactions] = await Promise.all([
+        ExpenseCategory.find({ user: userId, month, year }),
+        Employee.find({ user: userId, isActive: true }),
+        EmployeeTransaction.find({ user: userId, month, year }),
+      ]);
 
-      const employees = await Employee.find({ user: userId, isActive: true });
-      const transactions = await EmployeeTransaction.find({
-        user: userId,
-        month,
-        year,
-      });
+      totalExpense += categories.reduce((sum, cat) => sum + cat.amount, 0);
 
       const totalSalaries =
         employees.reduce((sum, emp) => sum + emp.salary, 0) +
@@ -77,34 +73,66 @@ export class DashboardService {
   ): Promise<any> {
     const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
     const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
+    const startOf6Months = new Date(year, month - 6, 1);
 
-    const incomes = await Income.find({
-      user: userId,
-      date: { $gte: startDate, $lte: endDate },
-    }).sort({ date: 1 });
-
-    const expenses = await Expense.find({
-      user: userId,
-      date: { $gte: startDate, $lte: endDate },
-    }).sort({ date: 1 });
+    const [
+      incomes,
+      expenses,
+      sixMonthIncomes,
+      sixMonthExpenses,
+      expenseCategories,
+      employees,
+      transactions,
+    ] = await Promise.all([
+      Income.find({
+        user: userId,
+        date: { $gte: startDate, $lte: endDate },
+      }).sort({ date: 1 }),
+      Expense.find({
+        user: userId,
+        date: { $gte: startDate, $lte: endDate },
+      }).sort({ date: 1 }),
+      Income.find({
+        user: userId,
+        date: { $gte: startOf6Months, $lte: endDate },
+      }),
+      Expense.find({
+        user: userId,
+        date: { $gte: startOf6Months, $lte: endDate },
+      }),
+      ExpenseCategory.find({ user: userId, month, year }),
+      Employee.find({ user: userId, isActive: true }),
+      EmployeeTransaction.find({ user: userId, month, year }),
+    ]);
 
     // Daily timeline data
     const daysInMonth = new Date(year, month, 0).getDate();
     const dailyTimelineData = [];
 
-    for (let day = 1; day <= daysInMonth; day++) {
-      const currentDate = new Date(year, month - 1, day);
-      const dateStr = currentDate.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      });
+    // Pre-calculate date strings for optimization
+    const incomeDatesMap: Record<number, any[]> = {};
+    const expenseDatesMap: Record<number, any[]> = {};
 
-      const dayIncomes = incomes.filter(
-        (inc) => new Date(inc.date).getDate() === day,
-      );
-      const dayExpenses = expenses.filter(
-        (exp) => new Date(exp.date).getDate() === day,
-      );
+    incomes.forEach((inc) => {
+      const day = new Date(inc.date).getDate();
+      if (!incomeDatesMap[day]) incomeDatesMap[day] = [];
+      incomeDatesMap[day].push(inc);
+    });
+
+    expenses.forEach((exp) => {
+      const day = new Date(exp.date).getDate();
+      if (!expenseDatesMap[day]) expenseDatesMap[day] = [];
+      expenseDatesMap[day].push(exp);
+    });
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateStr = `${new Date(year, month - 1, day).toLocaleDateString(
+        "en-US",
+        { month: "short", day: "numeric" },
+      )}`;
+
+      const dayIncomes = incomeDatesMap[day] || [];
+      const dayExpenses = expenseDatesMap[day] || [];
 
       dailyTimelineData.push({
         date: dateStr,
@@ -112,17 +140,6 @@ export class DashboardService {
         expense: dayExpenses.reduce((sum, exp) => sum + exp.amount, 0),
       });
     }
-
-    // Bar chart for last 6 months
-    const startOf6Months = new Date(year, month - 6, 1);
-    const sixMonthIncomes = await Income.find({
-      user: userId,
-      date: { $gte: startOf6Months, $lte: endDate },
-    });
-    const sixMonthExpenses = await Expense.find({
-      user: userId,
-      date: { $gte: startOf6Months, $lte: endDate },
-    });
 
     const monthlyData: any = {};
     for (let i = 0; i < 6; i++) {
@@ -157,19 +174,6 @@ export class DashboardService {
     const barChartData = Object.values(monthlyData).sort(
       (a: any, b: any) => a.sortKey - b.sortKey,
     );
-
-    // Pie chart
-    const expenseCategories = await ExpenseCategory.find({
-      user: userId,
-      month,
-      year,
-    });
-    const employees = await Employee.find({ user: userId, isActive: true });
-    const transactions = await EmployeeTransaction.find({
-      user: userId,
-      month,
-      year,
-    });
 
     const pieDataMap: any = {};
 
@@ -286,10 +290,10 @@ export class DashboardService {
       query.date = { $gte: startDate, $lte: endDate };
     }
 
-    const incomes = await Income.find(query).sort({ createdAt: -1 }).limit(10);
-    const expenses = await Expense.find(query)
-      .sort({ createdAt: -1 })
-      .limit(10);
+    const [incomes, expenses] = await Promise.all([
+      Income.find(query).sort({ createdAt: -1 }).limit(10),
+      Expense.find(query).sort({ createdAt: -1 }).limit(10),
+    ]);
 
     const transactions = [
       ...incomes.map((income) => ({ ...income.toObject(), type: "income" })),

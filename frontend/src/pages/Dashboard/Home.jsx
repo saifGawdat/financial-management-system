@@ -33,9 +33,7 @@ const Home = () => {
 
   const fetchDashboardData = useCallback(async () => {
     try {
-      // Don't set loading(true) if it's already true (first render)
-      setLoading((prev) => (prev ? prev : true));
-
+      // Only set loading if manually requested or first fetch
       const params = { month, year };
       const [statsRes, chartRes, recentRes] = await Promise.all([
         API.get("/dashboard/stats", { params }),

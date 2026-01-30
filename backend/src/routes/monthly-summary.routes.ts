@@ -8,7 +8,7 @@ const monthlySummaryController = new MonthlySummaryController();
 router.get("/", auth, monthlySummaryController.getAllMonthlySummaries);
 router.get("/:month/:year", auth, monthlySummaryController.getMonthlySummary);
 router.post(
-  "/:month/:year/recalculate",
+  "/recalculate/:month/:year",
   auth,
   monthlySummaryController.recalculateMonthlySummary,
 );
