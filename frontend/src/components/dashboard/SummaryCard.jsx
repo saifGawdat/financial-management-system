@@ -7,7 +7,7 @@ const SummaryCard = ({
   icon: Icon,
   iconColor,
   bgGradient,
-  highlight = false, 
+  highlight = false,
 }) => {
   const borderColorMap = {
     "from-purple-500 to-purple-500": "border-l-blue-500",
